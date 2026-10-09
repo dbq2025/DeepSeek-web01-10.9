@@ -38,7 +38,16 @@ export const useUserStore = defineStore(
       profile.value = null
     }
 
-    return { token, role, profile, isLogin, isAdmin, setLogin, logout }
+    /**
+     * 更新本地用户信息（个人信息修改成功后调用）
+     * @param {object} payload 新的用户信息
+     * @returns {void}
+     */
+    function updateProfile(payload) {
+      profile.value = { ...profile.value, ...payload }
+    }
+
+    return { token, role, profile, isLogin, isAdmin, setLogin, logout, updateProfile }
   },
   // 仅持久化 token（规范见 CLAUDE.md 第 4 章）
   { persist: { pick: ['token', 'role'] } }

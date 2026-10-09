@@ -8,6 +8,13 @@ dist-ssr/
 # WorkBuddy 工作区数据（记忆、会话缓存等，不属于项目代码）
 .workbuddy/
 
+# 第三方 mock 插件可能产生的打包临时文件（当前已改用自研中间件，保留作兜底）
+_*.bundled_*.mjs
+_*.bundled_*.cjs
+
+# Vite 在打包 vite.config.js 时写入的临时文件（进程被强杀时可能残留）
+vite.config.js.timestamp-*.mjs
+
 # 编辑器与系统
 .vscode/*
 !.vscode/extensions.json

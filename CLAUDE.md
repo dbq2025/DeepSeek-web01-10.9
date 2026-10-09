@@ -4,7 +4,7 @@
 > 所有参与者在新增/修改代码前必须先阅读本文件；提交前须逐条自检。
 >
 > 项目：电子商务平台前端系统（后台管理端 + 电商前台端）
-> 技术栈：Vite + Vue 3（组合式 API + `<script setup>`）+ JavaScript + Element Plus + Vue Router 4 + Pinia + Axios + ECharts + Mock.js
+> 技术栈：Vite + Vue 3（组合式 API + `<script setup>`）+ JavaScript + Element Plus + Vue Router 4 + Pinia + Axios + ECharts + 自研 Vite Mock 中间件
 > 版本：v1.0　更新：2026-10-09
 
 ---
@@ -325,6 +325,33 @@ meta: { title: '商品管理', requiresAuth: true, role: 'admin', keepAlive: fal
    └─ 只属于前台 → components/before/
 ```
 
+## 附录 C：Mock 层约定（务必遵守）
+
+> Mock 能力由**自研中间件** `build/mock-server-plugin.js` 提供（取代 `vite-plugin-mock`）。
+> 它不走"打包成临时文件再 require"的路线，而是**由 Node 原生 ESM 直接 `import()` 加载** mock 模块——
+> 零临时文件、零文件删除，可安全热重载。代价是必须遵守 Node ESM 的加载规则（见第 3 条）。
+
+1. **目录边界**：`src/mock/modules/` 是 `mockPath`，中间件只加载该目录下**直接子级**的 `.js` 文件，每个文件的 `export default` 必须是 MockMethod 数组（`{ url, method, response }`）。
+   - **共享数据层必须放在外层**：`src/mock/db.js`（数据）、`src/mock/helpers.js`（工具）。
+   - 该目录**不放任何临时文件**；如需临时禁用一个接口文件，把文件名改成 `_` 开头即可（中间件会跳过）。
+2. **共享状态的写法**：热重载时接口文件会带 `?t=<时间戳>` 重新 `import()`，得到**全新的模块实例**，因此模块级变量无法跨重载保留。**共享数据必须挂到 `globalThis`**：
+   ```js
+   const GLOBAL_KEY = '__ECOM_MOCK_DB__'
+   export function getDb() {
+     return (globalThis[GLOBAL_KEY] ||= createSeed())
+   }
+   ```
+3. **禁用 `@/` 别名，且必须写全 `.js` 扩展名**：mock 文件由 Node 直接加载，**不经过 Vite 转换**，既不认识 `@` 别名，也不做扩展名补全。一律这么写：
+   ```js
+   import { getDb } from '../db.js'            // ✅
+   import { ok, fail } from '../helpers.js'    // ✅
+   import { ok } from '@/mock/helpers'         // ❌ 别名 + 缺扩展名，必崩
+   ```
+4. **不要依赖 `vite.config.js` 里的 `ignore` 之类的排除配置**：中间件靠 `_` 前缀 + `.js` 后缀自行筛选，无需额外配置。若将来换回第三方 mock 插件，请先确认它是否会把产物写回被扫描的目录（曾因此产生 383 个临时文件）。
+5. **没有 `localStorage`**：mock 跑在 Node 进程里，数据存内存即可（浏览器刷新不丢、重启 dev server 重置）。
+6. **响应契约统一**走 `helpers.js` 的 `ok()` / `fail()`，不要在接口文件里手写 `{ code, message, data }`。
+7. **业务规则写在 mock 里**，例如「类型下还有商品时不允许删除」「库存不足不允许下单」，这样前端才能真正测到错误分支。
+
 ---
 
 *本规范由团队共同维护；任何修改需经 review 后合并，并在文末修订记录登记。*
@@ -332,3 +359,4 @@ meta: { title: '商品管理', requiresAuth: true, role: 'admin', keepAlive: fal
 | 版本 | 日期 | 修订内容 | 修订人 |
 | --- | --- | --- | --- |
 | v1.0 | 2026-10-09 | 初版 | — |
+| v1.1 | 2026-10-09 | Mock 方案由 `vite-plugin-mock` 改为自研中间件，附录 C 重写 | — |

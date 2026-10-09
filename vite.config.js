@@ -8,7 +8,7 @@ import vue from '@vitejs/plugin-vue'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
-import { viteMockServe } from 'vite-plugin-mock'
+import { mockServerPlugin } from './build/mock-server-plugin.js'
 
 export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd())
@@ -28,16 +28,28 @@ export default defineConfig(({ command, mode }) => {
       }),
 
       // 开发期 Mock（仅 dev 且 VITE_USE_MOCK=true 时生效）
-      viteMockServe({
-        mockPath: 'src/mock',
-        enable: command === 'serve' && useMock,
-        logger: true
+      // 使用自研中间件：直接以 Node ESM 动态 import 加载 mock 模块，
+      // 无临时文件、无删除动作，可安全热重载（见 build/mock-server-plugin.js）
+      // 约定：mockPath 目录下每个 .js 默认导出 MockMethod 数组；
+      // 共享数据层（db.js / helpers.js）必须放在该目录之外（见 src/mock/）
+      mockServerPlugin({
+        mockPath: 'src/mock/modules',
+        enabled: command === 'serve' && useMock
       })
     ],
 
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url))
+      }
+    },
+
+    css: {
+      preprocessorOptions: {
+        scss: {
+          // 使用 Dart Sass 现代 API，避免 legacy-js-api 弃用警告
+          api: 'modern-compiler'
+        }
       }
     },
 
