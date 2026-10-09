@@ -9,7 +9,7 @@ export default [
     path: '/admin/login',
     name: 'AdminLogin',
     component: () => import('@/views/admin/login/index.vue'),
-    meta: { title: '管理员登录' }
+    meta: { title: '管理员登录', guestOnly: true, guestRedirect: '/admin/dashboard' }
   },
   {
     path: '/admin',

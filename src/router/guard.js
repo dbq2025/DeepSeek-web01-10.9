@@ -13,11 +13,20 @@ import { useUserStore } from '@/store/modules/user'
 export function setupRouterGuard(router) {
   router.beforeEach((to, from, next) => {
     const userStore = useUserStore()
-    const { requiresAuth, role, title } = to.meta
+    const { requiresAuth, role, title, guestOnly, guestRedirect } = to.meta
 
     // 设置页面标题
     if (title) {
       document.title = `${title} - ${import.meta.env.VITE_APP_TITLE || '电子商务平台'}`
+    }
+
+    // 已登录访问登录/注册页 → 回跳对应首页（避免重复登录）
+    // 角色与区域不匹配时（如普通用户误入后台登录页）退回前台，避免二次跳转触发 404
+    if (guestOnly && userStore.isLogin) {
+      const isAdminArea = to.path.startsWith('/admin')
+      const denyRedirect = isAdminArea && userStore.role !== 'admin'
+      next({ path: denyRedirect ? '/' : guestRedirect || '/' })
+      return
     }
 
     // 需要登录但未登录 → 跳对应登录页并携带回跳地址

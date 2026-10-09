@@ -90,13 +90,13 @@ export default [
     path: '/login',
     name: 'Login',
     component: () => import('@/views/before/login/index.vue'),
-    meta: { title: '用户登录' }
+    meta: { title: '用户登录', guestOnly: true, guestRedirect: '/home' }
   },
   {
     path: '/register',
     name: 'Register',
     component: () => import('@/views/before/register/index.vue'),
-    meta: { title: '用户注册' }
+    meta: { title: '用户注册', guestOnly: true, guestRedirect: '/home' }
   },
   {
     path: '/:pathMatch(.*)*',

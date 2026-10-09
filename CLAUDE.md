@@ -200,14 +200,28 @@ export const useUserStore = defineStore('user', () => {
 ### 6.2 meta 约定
 
 ```js
+// 业务页（需登录）
 meta: { title: '商品管理', requiresAuth: true, role: 'admin', keepAlive: false, icon: 'Goods' }
+// 登录 / 注册页（仅游客可访问，已登录时回跳 guestRedirect）
+meta: { title: '管理员登录', guestOnly: true, guestRedirect: '/admin/dashboard' }
 ```
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `title` | String | 页面标题，同时用于侧边栏菜单文案与面包屑 |
+| `requiresAuth` | Boolean | 是否要求登录 |
+| `role` | `'admin' \| 'user'` | 要求登录时的角色 |
+| `guestOnly` | Boolean | 仅未登录可访问（登录 / 注册页） |
+| `guestRedirect` | String | `guestOnly` 页在已登录时的回跳地址 |
+| `keepAlive` | Boolean | 是否缓存组件（当前未启用） |
+| `icon` | String | 后台侧边栏图标名，与 `SidebarCom.vue` 的 `ICON_MAP` 对应 |
 
 ### 6.3 守卫
 
 - 所有鉴权逻辑集中在 `router/guard.js`：
-  - 前置守卫：判断 `requiresAuth` / `role`，未登录跳对应登录页并携带 `redirect`；已登录访问登录页则重定向首页；
+  - 前置守卫：判断 `guestOnly`（已登录回跳首页）→ `requiresAuth` / `role`（未登录跳对应登录页并携带 `redirect`，角色不匹配跳 `/404`）；
   - 后置守卫：设置 `document.title`、结束进度条。
+- 已登录访问后台登录页但角色非 `admin` 时，直接退回前台 `/`，**不再二次跳转**，避免撞上角色校验落到 404。
 - **禁止**在各个组件内散落写鉴权判断。
 - 按钮级权限使用 `v-permission` 指令（可选实现）。
 

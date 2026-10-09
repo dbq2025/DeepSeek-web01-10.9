@@ -1,10 +1,166 @@
+<!--
+  订单管理页
+  职责：按订单号 / 状态筛选 + 列表分页 + 详情跳转 + 状态流转（发货 / 完成 / 取消）
+  说明：状态按钮按当前订单状态条件渲染，避免出现非法流转
+-->
 <template>
-  <div class="page">
-    <h2>订单管理</h2>
-    <p>路由 /admin/order ｜ 骨架占位，P3 阶段实现订单列表分页与状态筛选</p>
+  <div class="order">
+    <SearchForm
+      :model-value="query"
+      :fields="searchFields"
+      :loading="loading"
+      @search="search"
+      @reset="reset"
+    />
+
+    <section class="order__panel">
+      <DataTable
+        :columns="columns"
+        :data="list"
+        :loading="loading"
+        empty-text="没有符合条件的订单"
+      >
+        <template #col-orderNo="{ row }">
+          <span class="order__no">{{ row.orderNo }}</span>
+        </template>
+        <template #col-items="{ row }">
+          <span>{{ row.items.length }} 种 / {{ itemsCount(row) }} 件</span>
+        </template>
+        <template #action="{ row }">
+          <el-button link type="primary" @click="goDetail(row)">详情</el-button>
+          <el-button
+            v-if="row.status === ORDER_STATUS.PAID"
+            link
+            type="success"
+            @click="onChangeStatus(row, ORDER_STATUS.SHIPPED)"
+          >
+            发货
+          </el-button>
+          <el-button
+            v-if="row.status === ORDER_STATUS.SHIPPED"
+            link
+            type="success"
+            @click="onChangeStatus(row, ORDER_STATUS.FINISHED)"
+          >
+            完成
+          </el-button>
+          <el-button
+            v-if="row.status === ORDER_STATUS.UNPAID"
+            link
+            type="danger"
+            @click="onChangeStatus(row, ORDER_STATUS.CANCELED)"
+          >
+            取消
+          </el-button>
+        </template>
+      </DataTable>
+
+      <Pagination
+        :page="query.page"
+        :page-size="query.pageSize"
+        :total="total"
+        @page-change="changePage"
+        @size-change="changeSize"
+      />
+    </section>
   </div>
 </template>
 
 <script setup>
-// TODO(P3): 订单列表 + 状态筛选 + 跳转详情
+import { useRouter } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import SearchForm from '@/components/common/SearchForm.vue'
+import DataTable from '@/components/common/DataTable.vue'
+import Pagination from '@/components/common/Pagination.vue'
+import { useTable } from '@/composables/useTable'
+import { getOrderListApi, updateOrderStatusApi } from '@/api/admin/order'
+import { ORDER_STATUS, ORDER_STATUS_TEXT } from '@/utils/constants'
+
+const router = useRouter()
+
+const { loading, list, total, query, load, search, reset, changePage, changeSize } = useTable(
+  getOrderListApi,
+  { defaultQuery: { orderNo: '', status: '' }, pageSize: 10 }
+)
+
+/** 状态下拉选项（由常量映射表生成，避免重复维护） */
+const ORDER_STATUS_OPTIONS = Object.keys(ORDER_STATUS_TEXT).map((key) => ({
+  label: ORDER_STATUS_TEXT[key],
+  value: Number(key)
+}))
+
+const searchFields = [
+  { prop: 'orderNo', label: '订单号' },
+  { prop: 'status', label: '订单状态', type: 'select', options: ORDER_STATUS_OPTIONS }
+]
+
+const columns = [
+  { prop: 'orderNo', label: '订单号', width: 180 },
+  { prop: 'userName', label: '下单用户', width: 110 },
+  { prop: 'items', label: '商品', width: 130 },
+  { prop: 'totalPrice', label: '订单金额', type: 'money', width: 120, align: 'right' },
+  { prop: 'status', label: '状态', type: 'tag', tagKind: 'order', width: 100, align: 'center' },
+  { prop: 'createTime', label: '下单时间', type: 'date', width: 170 },
+  { label: '操作', type: 'action', width: 170, align: 'center', fixed: 'right' }
+]
+
+/**
+ * 订单商品总件数
+ * @param {object} target 行数据
+ * @returns {number}
+ */
+function itemsCount(target) {
+  return (target.items || []).reduce((sum, item) => sum + item.count, 0)
+}
+
+/**
+ * 跳转订单详情
+ * @param {object} target 行数据
+ */
+function goDetail(target) {
+  router.push(`/admin/order/${target.id}`)
+}
+
+/**
+ * 修改订单状态（二次确认）
+ * @param {object} target 行数据
+ * @param {number} status 目标状态
+ * @returns {Promise<void>}
+ */
+async function onChangeStatus(target, status) {
+  const text = ORDER_STATUS_TEXT[status]
+  try {
+    await ElMessageBox.confirm(`确定将订单「${target.orderNo}」标记为「${text}」吗？`, '操作确认', {
+      type: 'warning',
+      confirmButtonText: `确定${text}`,
+      cancelButtonText: '取消'
+    })
+  } catch {
+    return // 用户取消
+  }
+
+  try {
+    await updateOrderStatusApi({ id: target.id, status })
+    ElMessage.success(`已标记为${text}`)
+    await load()
+  } catch (error) {
+    // 失败提示已由 request.js 统一处理
+  }
+}
 </script>
+
+<style scoped lang="scss">
+.order {
+  &__panel {
+    @include card-surface;
+
+    padding: 16px 16px 8px;
+  }
+
+  &__no {
+    color: var(--el-text-color-primary);
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 13px;
+  }
+}
+</style>
