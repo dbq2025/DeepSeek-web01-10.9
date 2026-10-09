@@ -3,8 +3,9 @@
  * 职责：维护商品类型 / 商品 / 订单 / 用户 / 收藏 / 轮播等模拟表，供各 mock 模块读写
  *
  * 设计说明（重要）：
- * 1. vite-plugin-mock 会用 esbuild 把每个 mock 文件**单独打包**，因此本文件会被复制多份，
- *    模块级变量无法共享 —— 故用 globalThis 挂单例，保证所有接口读写同一份数据。
+ * 1. mock 模块由 build/mock-server-plugin.js 用 Node 原生 ESM 动态 import 加载，
+ *    热重载时会带 ?t= 时间戳重新导入、得到全新模块实例，
+ *    因此共享数据必须挂 globalThis 单例，保证所有接口读写同一份数据。
  * 2. Mock 运行在 Node（Vite dev server）进程内，没有 localStorage；
  *    数据存活于 dev server 进程，浏览器刷新不丢，重启 dev server 才重置为种子数据。
  */
@@ -49,6 +50,66 @@ function createRandom(seed) {
 /** 两位补零 */
 const pad = (n) => String(n).padStart(2, '0')
 
+/** 各商品类型对应的封面色（用于生成占位封面） */
+const COVER_COLORS = {
+  1: '#4a7cf7',
+  2: '#20b2aa',
+  3: '#f2994a',
+  4: '#eb5757',
+  5: '#9b51e0',
+  6: '#27ae60'
+}
+
+/**
+ * 转义 XML 特殊字符（商品名含《》等符号，直接拼进 SVG 会破坏结构）
+ * @param {string} text 原始文本
+ * @returns {string}
+ */
+function escapeXml(text) {
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
+/**
+ * 生成 SVG 占位封面（DataURL）
+ * 说明：纯前端项目不引入外部图片资源，用内联 SVG 让列表页 / 详情页有真实图片可渲染，
+ *       既不依赖网络，也便于截图与离线演示；底色按商品类型区分，视觉上可辨识
+ * @param {string} name 商品名
+ * @param {number} categoryId 商品类型 id
+ * @returns {string} data:image/svg+xml 形式的图片地址
+ */
+function buildCover(name, categoryId) {
+  const color = COVER_COLORS[categoryId] || '#909399'
+  const label = escapeXml(name.length > 9 ? `${name.slice(0, 9)}…` : name)
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240">` +
+    `<rect width="240" height="240" fill="${color}"/>` +
+    `<text x="120" y="112" font-size="16" fill="#ffffff" text-anchor="middle" font-family="sans-serif">${label}</text>` +
+    `<text x="120" y="140" font-size="12" fill="#ffffffcc" text-anchor="middle" font-family="sans-serif">NO IMAGE</text>` +
+    `</svg>`
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
+}
+
+/**
+ * 生成轮播图占位图（DataURL，宽幅比例）
+ * @param {string} title 轮播标题
+ * @param {number} index 序号，用于挑选底色
+ * @returns {string}
+ */
+function buildBanner(title, index) {
+  const colors = ['#4a7cf7', '#eb5757', '#27ae60']
+  const color = colors[(index - 1) % colors.length]
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360">` +
+    `<rect width="1200" height="360" fill="${color}"/>` +
+    `<text x="600" y="196" font-size="40" fill="#ffffff" text-anchor="middle" font-family="sans-serif">${escapeXml(title)}</text>` +
+    `</svg>`
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
+}
+
 /**
  * 构造种子数据
  * @returns {object} 完整的模拟数据库
@@ -74,7 +135,7 @@ function createSeed() {
         stock: randInt(0, 300),
         sales: randInt(0, 500),
         status: random() > 0.15 ? 1 : 0, // 约 85% 上架
-        cover: '',
+        cover: buildCover(name, Number(categoryId)),
         description: `${name}，正品保障，七天无理由退换。`,
         createTime: `2026-0${randInt(1, 9)}-${pad(randInt(1, 28))} 10:00:00`
       })
@@ -155,9 +216,9 @@ function createSeed() {
     users,
     favorites,
     banners: [
-      { id: 1, title: '新机首发 · 至高立减 800 元', image: '', sort: 1 },
-      { id: 2, title: '家电焕新季 · 满 3000 减 300', image: '', sort: 2 },
-      { id: 3, title: '秋季出行 · 户外装备 5 折起', image: '', sort: 3 }
+      { id: 1, title: '新机首发 · 至高立减 800 元', image: buildBanner('新机首发 · 至高立减 800 元', 1), sort: 1 },
+      { id: 2, title: '家电焕新季 · 满 3000 减 300', image: buildBanner('家电焕新季 · 满 3000 减 300', 2), sort: 2 },
+      { id: 3, title: '秋季出行 · 户外装备 5 折起', image: buildBanner('秋季出行 · 户外装备 5 折起', 3), sort: 3 }
     ]
   }
 }

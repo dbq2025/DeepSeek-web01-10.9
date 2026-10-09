@@ -1,0 +1,71 @@
+/**
+ * 响应式断点与通用布局 mixin
+ * 约定：断点数值统一取自 variables.scss，禁止在业务样式中硬编码媒体查询宽度
+ * 用法：@include respond-to('md') { ... }
+ */
+
+@use './variables.scss' as *;
+
+/// 最小宽度断点（≥ 断点即生效）—— 桌面优先写法
+/// @param {String} $name 断点名称：sm | md | lg
+@mixin respond-to($name) {
+  @if $name == 'sm' {
+    @media (min-width: $breakpoint-sm) {
+      @content;
+    }
+  } @else if $name == 'md' {
+    @media (min-width: $breakpoint-md) {
+      @content;
+    }
+  } @else if $name == 'lg' {
+    @media (min-width: $breakpoint-lg) {
+      @content;
+    }
+  } @else {
+    @error "respond-to() 只接受 'sm' | 'md' | 'lg'，收到：#{$name}";
+  }
+}
+
+/// 最大宽度断点（< 断点即生效）—— 移动优先写法
+/// @param {String} $name 断点名称：sm | md | lg
+@mixin respond-below($name) {
+  @if $name == 'sm' {
+    @media (max-width: ($breakpoint-sm - 1px)) {
+      @content;
+    }
+  } @else if $name == 'md' {
+    @media (max-width: ($breakpoint-md - 1px)) {
+      @content;
+    }
+  } @else if $name == 'lg' {
+    @media (max-width: ($breakpoint-lg - 1px)) {
+      @content;
+    }
+  } @else {
+    @error "respond-below() 只接受 'sm' | 'md' | 'lg'，收到：#{$name}";
+  }
+}
+
+/// 单行文本省略
+@mixin ellipsis {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/// 多行文本省略
+/// @param {Number} $line 显示行数
+@mixin ellipsis-multi($line: 2) {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: $line;
+  overflow: hidden;
+}
+
+/// 卡片容器（统一圆角 + 阴影 + 内边距）
+@mixin card-surface {
+  padding: 16px;
+  background: var(--el-bg-color);
+  border: 1px solid var(--el-border-color-lighter);
+  border-radius: 6px;
+}

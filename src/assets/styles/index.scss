@@ -1,9 +1,10 @@
 /**
  * 全局样式入口
- * 职责：引入变量、Element Plus 主题覆盖、全局基础样式
+ * 职责：引入 Element Plus 主题覆盖与全局基础样式
+ * 注意：variables.scss / mixins.scss 已由 vite.config.js 的 additionalData 统一注入，
+ *       此处不能再次 @use，否则同一模块被加载两次会报错
  */
 
-@use './variables.scss' as *;
 @use './element-override.scss';
 
 * {
@@ -21,5 +22,5 @@ body,
 body {
   font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Microsoft YaHei',
     Arial, sans-serif;
-  color: #303133;
+  color: $text-primary;
 }

@@ -62,6 +62,13 @@ export default [
         meta: { title: '我的收藏', requiresAuth: true, role: 'user' }
       },
       {
+        // 开发自测页：集中演示 components/common 下的通用组件（非业务页面，无需登录）
+        path: 'demo',
+        name: 'Demo',
+        component: () => import('@/views/demo/index.vue'),
+        meta: { title: '通用组件演示' }
+      },
+      {
         path: 'user',
         name: 'UserCenter',
         component: () => import('@/views/before/user/index.vue'),

@@ -1,13 +1,11 @@
 /**
  * Vite 构建配置
- * 职责：路径别名、Vue 插件、Element Plus 按需引入、开发期 Mock 中间件
+ * 职责：路径别名、Vue 插件、Element Plus 全局注册、开发期 Mock 中间件、SCSS 全局注入
  */
 import { fileURLToPath, URL } from 'node:url'
 import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import AutoImport from 'unplugin-auto-import/vite'
-import Components from 'unplugin-vue-components/vite'
-import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import { mockServerPlugin } from './build/mock-server-plugin.js'
 
 export default defineConfig(({ command, mode }) => {
@@ -18,14 +16,16 @@ export default defineConfig(({ command, mode }) => {
     plugins: [
       vue(),
 
-      // Element Plus 与 Vue API 自动按需引入
-      AutoImport({
-        imports: ['vue', 'vue-router', 'pinia'],
-        resolvers: [ElementPlusResolver()]
-      }),
-      Components({
-        resolvers: [ElementPlusResolver()]
-      }),
+      // 自动引入 Vue / Vue Router / Pinia 的组合式 API（构建期转换，无运行时开销）
+      AutoImport({ imports: ['vue', 'vue-router', 'pinia'] }),
+
+      // ── Element Plus 采用「全量注册 + 全局样式」而非按需引入 ──────────────
+      // 原因：main.js 里 app.use(ElementPlus) 本身就会把整个组件库打进产物，
+      // 按需解析器（unplugin-vue-components + ElementPlusResolver）只是额外
+      // 为每个用到的组件再注入一份 style/css —— 既与全局 index.css 重复，
+      // 又会让 Vite 依赖预构建不断发现新依赖、反复触发重新预构建（实测会因
+      // 清理缓存目录被安全策略拦截而直接崩掉 dev server）。
+      // 故此处只保留全局注册方案，依赖图恒定，dev server 不再抖动。
 
       // 开发期 Mock（仅 dev 且 VITE_USE_MOCK=true 时生效）
       // 使用自研中间件：直接以 Node ESM 动态 import 加载 mock 模块，
@@ -48,7 +48,13 @@ export default defineConfig(({ command, mode }) => {
       preprocessorOptions: {
         scss: {
           // 使用 Dart Sass 现代 API，避免 legacy-js-api 弃用警告
-          api: 'modern-compiler'
+          api: 'modern-compiler',
+          // 让每个组件的 <style lang="scss"> 无需重复 @use 即可直接使用设计变量与 mixin
+          // （CLAUDE.md 第 7 章要求「禁止硬编码色值」「媒体查询用 mixin 封装」，
+          //   若靠各文件手写 @use 容易漏写，故在此统一注入）
+          additionalData: '@use "variables" as *;\n@use "mixins" as *;\n',
+          // additionalData 里的裸文件名靠 loadPaths 定位，避免依赖 SCSS 无法解析的 @ 别名
+          loadPaths: [fileURLToPath(new URL('./src/assets/styles', import.meta.url))]
         }
       }
     },

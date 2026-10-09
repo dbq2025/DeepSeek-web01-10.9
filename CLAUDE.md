@@ -223,12 +223,20 @@ meta: { title: '商品管理', requiresAuth: true, role: 'admin', keepAlive: fal
 
 ## 7. 样式规范
 
-- 统一使用 **SCSS**；全局变量与 Element Plus 主题覆盖集中在 `assets/styles/`（`variables.scss` + `element-override.scss`）。
+- 统一使用 **SCSS**；全局变量 / mixin / Element Plus 主题覆盖集中在 `assets/styles/`（`variables.scss`、`mixins.scss`、`element-override.scss`）。
+- **`variables.scss` 与 `mixins.scss` 已由 `vite.config.js` 的 `css.preprocessorOptions.scss.additionalData` 自动注入**到每个 `<style lang="scss">`：
+  - 组件里**直接**用 `$color-primary`、`@include respond-to('md')`、`@include card-surface` 即可；
+  - **禁止**再手写 `@use '@/assets/styles/variables.scss'` —— 同一模块被加载两次会直接报错。
 - 组件样式一律 `scoped`；需穿透子组件用 `:deep()`。
 - 优先使用 Element Plus 提供的 CSS 变量，**禁止硬编码十六进制色值**（除设计稿明确定义且已提为变量）。
-- class 命名使用 BEM-lite 或语义化 kebab-case；**禁止**用内联 `style` 写复杂样式（动态尺寸例外）。
-- 响应式断点统一：`xs < 768`、`sm ≥ 768`、`md ≥ 992`、`lg ≥ 1200`，用 SCSS mixin 封装 `@media`。
+- class 命名使用 BEM-lite 或语义化 kebab-case；**禁止**用内联 `style` 写复杂样式（动态尺寸例外，如上传框宽高）。
+- 响应式断点统一：`xs < 768`、`sm ≥ 768`、`md ≥ 992`、`lg ≥ 1200`，用 `mixins.scss` 的 `respond-to()` / `respond-below()` 封装 `@media`，**禁止**硬编码媒体查询宽度。
 - 前台（`views/before`）需至少保证首页、商品详情、购物车在移动端可用。
+
+**Element Plus 引入方式（已定，勿改）**：采用 `app.use(ElementPlus, { locale: zhCn })` + 全局 `element-plus/dist/index.css`。
+- **禁止**重新引入 `unplugin-vue-components` / `ElementPlusResolver`：它与全局 CSS 重复，且会让 Vite 依赖预构建反复「发现新依赖 → 重新预构建」，而重新预构建需清理 `.vite` 缓存目录，实测会让 dev server 崩溃。
+- **禁止**去掉 `{ locale: zhCn }`：Element Plus 默认英文，分页、日期选择器、上传组件等会全部显示英文。
+- 命令式组件（`ElMessage` / `ElMessageBox` 等）必须**显式 import**，不要依赖自动引入。
 
 ---
 
@@ -354,9 +362,46 @@ meta: { title: '商品管理', requiresAuth: true, role: 'admin', keepAlive: fal
 
 ---
 
+## 附录 D：通用组件契约（`components/common/`）
+
+> 这 7 个组件是后台 / 前台共用的 UI 底座。**新增页面必须优先复用它们**，
+> 不要在页面里手写一整套 `el-table` + `el-pagination` + 搜索表单。
+> 演示与用法示例见 `views/demo/index.vue`（访问 `/demo`）。
+
+| 组件 | 职责 | 关键 props | 事件 / 插槽 |
+| --- | --- | --- | --- |
+| `SearchForm` | 配置化搜索栏 | `modelValue`（父级 reactive 查询对象）、`fields`、`loading` | `@search`、`@reset`；默认插槽放右侧主操作按钮 |
+| `DataTable` | 列配置驱动表格 | `columns`、`data`、`loading`、`showIndex`、`showSelection`、`rowKey`、`emptyText` | `@selection-change`、`@row-click`；插槽 `#col-<prop>`、`#action` |
+| `Pagination` | 分页 | `page`、`pageSize`、`total`、`pageSizes` | `@page-change`、`@size-change`（直接接 `useTable`） |
+| `StatusTag` | 状态标签 | `kind`（`order` \| `goods`）、`status` | — |
+| `ImageUpload` | 图片选择与上传 | `modelValue`、`uploadFn`、`maxSize`、`tip`、`width`、`height` | `@success`、`@error` |
+| `FormDialog` | 表单弹窗（内置校验） | `modelValue`、`title`、`model`、`rules`、`loading`、`width`、`labelWidth` | `@confirm`（校验通过才触发）、`@cancel`、`@closed`；插槽 `#footer` |
+| `EmptyState` | 空状态 | `description`、`imageSize`、`minHeight` | 默认插槽放操作按钮 |
+
+**`DataTable` 的 `columns` 列类型**：
+
+| `type` | 效果 |
+| --- | --- |
+| 省略 | 直接输出字段值（空值显示 `-`） |
+| `money` | `formatMoney` 格式化（¥1,299.00） |
+| `date` | `formatDate` 格式化 |
+| `tag` | 渲染 `StatusTag`，需配 `tagKind` |
+| `image` | 渲染 `el-image` 缩略图 + 点击预览 |
+| `action` | 操作列，内容由 `#action` 插槽提供 |
+
+> 约定：`columns` 中若给了 `prop`，父组件可用 `#col-<prop>` 覆盖该列渲染（优先级高于内置类型）。
+
+**硬性约束**
+1. 通用组件**禁止** import 任何 `api/*` 模块——需要接口时通过 props 注入（如 `ImageUpload` 的 `uploadFn`）。
+2. 通用组件**禁止** import `views/` 下的业务组件（CLAUDE.md 第 10 章第 10 条）。
+3. 新增通用组件必须同时补到本表格，并在 `/demo` 页加上演示。
+
+---
+
 *本规范由团队共同维护；任何修改需经 review 后合并，并在文末修订记录登记。*
 
 | 版本 | 日期 | 修订内容 | 修订人 |
 | --- | --- | --- | --- |
 | v1.0 | 2026-10-09 | 初版 | — |
 | v1.1 | 2026-10-09 | Mock 方案由 `vite-plugin-mock` 改为自研中间件，附录 C 重写 | — |
+| v1.2 | 2026-10-09 | 新增附录 D（通用组件契约）；第 7 章补充 SCSS 全局注入与 Element Plus 引入方式 | — |
