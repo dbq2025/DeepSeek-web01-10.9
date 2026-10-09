@@ -1,0 +1,25 @@
+/**
+ * 全局样式入口
+ * 职责：引入变量、Element Plus 主题覆盖、全局基础样式
+ */
+
+@import './variables.scss';
+@import './element-override.scss';
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Microsoft YaHei',
+    Arial, sans-serif;
+  color: #303133;
+}

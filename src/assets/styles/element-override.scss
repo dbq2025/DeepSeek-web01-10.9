@@ -1,0 +1,7 @@
+/**
+ * Element Plus 主题覆盖
+ * 说明：通过 CSS 变量覆盖组件库默认样式，禁止直接改 element-plus 源码
+ */
+:root {
+  --el-color-primary: #409eff;
+}
