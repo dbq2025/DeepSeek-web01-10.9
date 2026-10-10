@@ -5,7 +5,6 @@
 import { fileURLToPath, URL } from 'node:url'
 import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import AutoImport from 'unplugin-auto-import/vite'
 import { mockServerPlugin } from './build/mock-server-plugin.js'
 
 export default defineConfig(({ command, mode }) => {
@@ -16,8 +15,10 @@ export default defineConfig(({ command, mode }) => {
     plugins: [
       vue(),
 
-      // 自动引入 Vue / Vue Router / Pinia 的组合式 API（构建期转换，无运行时开销）
-      AutoImport({ imports: ['vue', 'vue-router', 'pinia'] }),
+      // ── 不使用任何编译期自动导入 ────────────────────────────────────────
+      // 曾配置过 unplugin-auto-import（imports: ['vue','vue-router','pinia']），但全项目仍是
+      // 显式 import，插件从未生效。显式导入可读性更好、也让依赖图保持恒定 ——
+      // 而依赖图一旦变化就会触发 Vite 重新预构建，进而清理 .vite/deps 缓存目录。
 
       // ── Element Plus 采用「全量注册 + 全局样式」而非按需引入 ──────────────
       // 原因：main.js 里 app.use(ElementPlus) 本身就会把整个组件库打进产物，

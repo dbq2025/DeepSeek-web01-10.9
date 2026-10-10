@@ -30,7 +30,7 @@
           <el-input
             v-model="form.nickname"
             placeholder="请输入昵称"
-            maxlength="20"
+            :maxlength="NICKNAME_MAX"
             show-word-limit
           />
         </el-form-item>
@@ -58,7 +58,7 @@ import { ElMessage } from 'element-plus'
 import ImageUpload from '@/components/common/ImageUpload.vue'
 import { getUserProfileApi, updateUserProfileApi } from '@/api/before/auth'
 import { useUserStore } from '@/store/modules/user'
-import { PHONE_RULE, required } from '@/utils/validate'
+import { NICKNAME_MAX, PHONE_RULE, required } from '@/utils/validate'
 import { formatDate } from '@/utils/format'
 
 const userStore = useUserStore()

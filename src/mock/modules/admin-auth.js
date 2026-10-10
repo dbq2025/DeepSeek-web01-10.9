@@ -3,7 +3,8 @@
  * 对应 api/admin/auth.js
  */
 import { getDb } from '../db.js'
-import { ok, fail, buildToken, currentUser, publicUser } from '../helpers.js'
+import { ok, fail, buildToken, requireUser, publicUser } from '../helpers.js'
+import { checkNickname, checkPhone } from '../../utils/validate.js'
 
 export default [
   {
@@ -32,8 +33,8 @@ export default [
     method: 'get',
     response: ({ headers }) => {
       const db = getDb()
-      const user = currentUser({ headers }, db.users)
-      if (!user || user.role !== 'admin') return fail('未登录或登录已过期', 401)
+      const { user, error } = requireUser({ headers }, db.users, 'admin')
+      if (error) return error
       return ok(publicUser(user))
     }
   },
@@ -42,11 +43,20 @@ export default [
     method: 'put',
     response: ({ body, headers }) => {
       const db = getDb()
-      const user = currentUser({ headers }, db.users)
-      if (!user || user.role !== 'admin') return fail('未登录或登录已过期', 401)
+      const { user, error } = requireUser({ headers }, db.users, 'admin')
+      if (error) return error
       const { nickname, phone, avatar } = body || {}
-      if (nickname !== undefined) user.nickname = nickname
-      if (phone !== undefined) user.phone = phone
+      if (nickname !== undefined) {
+        if (!String(nickname).trim()) return fail('昵称不能为空', 400)
+        const nicknameError = checkNickname(nickname)
+        if (nicknameError) return fail(nicknameError, 400)
+        user.nickname = nickname
+      }
+      if (phone !== undefined) {
+        const phoneError = checkPhone(phone)
+        if (phoneError) return fail(phoneError, 400)
+        user.phone = phone
+      }
       if (avatar !== undefined) user.avatar = avatar
       return ok(publicUser(user))
     }

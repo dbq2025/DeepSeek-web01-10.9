@@ -37,7 +37,11 @@ export function setupRouterGuard(router) {
     }
 
     // 角色不匹配 → 拦截（示例：管理员区域仅 admin 可进）
-    if (role && userStore.role && userStore.role !== role) {
+    // 注意：不可写成 `role && userStore.role && userStore.role !== role`。
+    //      user store 的 token 与 role 是两个独立持久化字段，当本地数据里 role 缺失
+    //      （空字符串）时，上述三条件式会整体短路导致守卫放行。这里刻意不依赖
+    //      userStore.role 的真值：role 缺失一律视为不匹配，直接拦下。
+    if (role && userStore.role !== role) {
       next({ path: '/404' })
       return
     }

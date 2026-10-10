@@ -48,6 +48,11 @@ npm run lint          # ESLint 检查
 npm run format        # Prettier 格式化
 ```
 
+> ⚠️ **验收 / 演示请使用 `npm run dev`，不要用 `npm run preview`。**
+> 本系统的数据全部来自开发期的 Mock 中间件，它只在 `vite dev` 下挂载（`configureServer`），
+> 生产构建产物中不含任何后端 —— 用 `preview` 打开会是一个接口全部 404 的空壳页面。
+> `build` / `preview` 仅用于校验产物能正常加载、拆包体积是否符合预期。
+
 **环境要求**：Node.js ≥ 18（推荐 20+）、npm ≥ 9。
 
 ### 演示账号
@@ -183,7 +188,10 @@ npm run format        # Prettier 格式化
 | 文件 | 变量 | 说明 |
 | --- | --- | --- |
 | `.env.development` | `VITE_API_BASE=/api`、`VITE_USE_MOCK=true` | 开发期启用 Mock |
-| `.env.production` | `VITE_USE_MOCK=false` | 生产构建不打包 Mock 中间件 |
+| `.env.production` | `VITE_USE_MOCK=false` | 生产构建不含 Mock 中间件 |
+
+> 注意 `VITE_USE_MOCK` 只对 `npm run dev` 生效：Mock 中间件挂在 Vite 的 `configureServer` 钩子上，
+> `vite build` 的产物里本就不含任何 Mock 代码，故生产环境无论该值真假都没有后端可用。
 
 ---
 

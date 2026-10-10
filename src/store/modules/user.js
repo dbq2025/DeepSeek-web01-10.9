@@ -1,7 +1,7 @@
 /**
  * 用户状态（登录态 / token / 角色）
- * 说明：管理员与前台用户共用一份登录态，用 role 区分
- * 骨架占位：登录/登出接口待接入 api/before/auth.js、api/admin/auth.js
+ * 说明：管理员与前台用户共用一份登录态，用 role 区分。
+ *      只持久化 token 与 role —— profile 不落盘，需各页面按需补拉（见 /api/auth/profile）
  */
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'

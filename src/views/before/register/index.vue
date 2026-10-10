@@ -36,7 +36,13 @@
       </el-form-item>
 
       <el-form-item prop="nickname">
-        <el-input v-model="form.nickname" placeholder="昵称（默认与用户名相同）" clearable />
+        <el-input
+          v-model="form.nickname"
+          placeholder="昵称（默认与用户名相同）"
+          :maxlength="NICKNAME_MAX"
+          show-word-limit
+          clearable
+        />
       </el-form-item>
 
       <el-form-item prop="phone">
@@ -71,7 +77,14 @@ import { reactive, ref } from 'vue'
 import { Iphone, Lock, User } from '@element-plus/icons-vue'
 import AuthShell from '@/components/before/AuthShell.vue'
 import { useAuth } from '@/composables/useAuth'
-import { PASSWORD_RULE, PHONE_RULE, USERNAME_RULE, required } from '@/utils/validate'
+import {
+  checkNickname,
+  NICKNAME_MAX,
+  PASSWORD_RULE,
+  PHONE_RULE,
+  USERNAME_RULE,
+  required
+} from '@/utils/validate'
 
 const { register } = useAuth()
 
@@ -97,10 +110,17 @@ const validateConfirm = (rule, value, callback) => {
   }
 }
 
+/** 昵称校验：复用与服务端同一份 checkNickname，避免前后端规则漂移 */
+const validateNickname = (rule, value, callback) => {
+  const error = checkNickname(value)
+  error ? callback(new Error(error)) : callback()
+}
+
 const rules = {
   username: [required('用户名'), USERNAME_RULE],
   password: [required('密码'), PASSWORD_RULE],
   confirmPassword: [{ validator: validateConfirm, trigger: 'blur' }],
+  nickname: [{ validator: validateNickname, trigger: 'blur' }],
   phone: [PHONE_RULE]
 }
 

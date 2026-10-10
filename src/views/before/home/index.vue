@@ -18,15 +18,12 @@
       <h2 class="home__title">商品分类</h2>
       <div class="home__cats">
         <router-link
-          v-for="(item, index) in categoryStore.list"
+          v-for="item in categoryStore.list"
           :key="item.id"
           class="home__cat"
           :to="{ path: '/search', query: { categoryId: item.id } }"
         >
-          <span
-            class="home__cat-dot"
-            :style="{ background: dotColors[index % dotColors.length] }"
-          />
+          <span class="home__cat-dot" />
           <span class="home__cat-name">{{ item.name }}</span>
         </router-link>
       </div>
@@ -58,9 +55,6 @@ import { getBannersApi, getRecommendGoodsApi } from '@/api/before/goods'
 import { useCategoryStore } from '@/store/modules/category'
 
 const categoryStore = useCategoryStore()
-
-/** 分类入口的圆点配色（视觉点缀，与商品类型无业务绑定） */
-const dotColors = ['#4a7cf7', '#20b2aa', '#f2994a', '#eb5757', '#9b51e0', '#27ae60']
 
 const banners = ref([])
 const recommends = ref([])
@@ -168,6 +162,13 @@ onMounted(loadHomeData)
     height: 8px;
     flex: none;
     border-radius: 50%;
+  }
+
+  // 圆点配色按 $dot-colors 循环取用（nth-child 为 1 起算，与 $dot-colors 的键 1..6 对齐）
+  @each $index, $color in $dot-colors {
+    .home__cats .home__cat:nth-child(#{length($dot-colors)}n + #{$index}) .home__cat-dot {
+      background: $color;
+    }
   }
 
   &__grid {

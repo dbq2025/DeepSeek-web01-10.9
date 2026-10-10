@@ -5,6 +5,16 @@
  */
 import { getDb } from '../db.js'
 import { ok } from '../helpers.js'
+import { ORDER_STATUS } from '../../utils/constants.js'
+
+/**
+ * 是否为计入统计的有效订单
+ * 说明：已取消订单在 /api/order/cancel 中已回滚库存与销量，若仍计入金额/销量统计，
+ *      会造成「库存已还原、销售额没还原」的数据自相矛盾
+ * @param {object} order 订单
+ * @returns {boolean}
+ */
+const isCounted = (order) => order.status !== ORDER_STATUS.CANCELED
 
 /**
  * 按月聚合销量与金额（关联 orders.items）
@@ -13,7 +23,7 @@ import { ok } from '../helpers.js'
 function salesByMonth() {
   const db = getDb()
   const map = {}
-  db.orders.forEach((order) => {
+  db.orders.filter(isCounted).forEach((order) => {
     const month = String(order.createTime).slice(0, 7)
     if (!map[month]) {
       map[month] = { month, orderCount: 0, salesCount: 0, amount: 0 }
@@ -36,7 +46,7 @@ function ordersByCategory() {
   const goodsMap = Object.fromEntries(db.goods.map((g) => [g.id, g]))
   const categoryMap = Object.fromEntries(db.categories.map((c) => [c.id, c.name]))
   const result = {}
-  db.orders.forEach((order) => {
+  db.orders.filter(isCounted).forEach((order) => {
     order.items.forEach((item) => {
       const goods = goodsMap[item.goodsId]
       const name = goods ? categoryMap[goods.categoryId] || '未分类' : '已下架商品'
@@ -55,9 +65,11 @@ export default [
       return ok({
         goodsCount: db.goods.length,
         onSaleCount: db.goods.filter((g) => g.status === 1).length,
+        // 订单总数口径：全部订单（含已取消），与「订单管理」列表条数保持一致
         orderCount: db.orders.length,
         userCount: db.users.filter((u) => u.role === 'user').length,
-        totalAmount: db.orders.reduce((sum, o) => sum + o.totalPrice, 0)
+        // 金额口径：仅有效订单（排除已取消），否则会与库存回滚后的数据自相矛盾
+        totalAmount: db.orders.filter(isCounted).reduce((sum, o) => sum + o.totalPrice, 0)
       })
     }
   },

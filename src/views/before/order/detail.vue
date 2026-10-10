@@ -86,7 +86,7 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import StatusTag from '@/components/common/StatusTag.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
@@ -96,7 +96,11 @@ import { cancelOrderApi, getOrderDetailApi, payOrderApi } from '@/api/before/ord
 import { ORDER_STATUS } from '@/utils/constants'
 import { formatMoney, formatOrderStatus } from '@/utils/format'
 
-const route = useRoute()
+/** 路由参数中的订单 id（由路由配置的 props: true 注入） */
+const props = defineProps({
+  id: { type: [String, Number], required: true }
+})
+
 const router = useRouter()
 
 /** 窄屏描述列表切换为单列 */
@@ -112,7 +116,7 @@ const totalCount = computed(() => (order.value?.items || []).reduce((sum, it) =>
 async function loadDetail() {
   loading.value = true
   try {
-    order.value = await getOrderDetailApi(route.params.id)
+    order.value = await getOrderDetailApi(props.id)
   } catch (error) {
     order.value = null
   } finally {

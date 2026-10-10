@@ -12,6 +12,7 @@ import {
   nextId,
   formatDateTime
 } from '../helpers.js'
+import { checkNickname, checkPhone, PASSWORD_RULE, USERNAME_RULE } from '../../utils/validate.js'
 
 export default [
   {
@@ -36,7 +37,14 @@ export default [
     response: ({ body }) => {
       const { username, password, nickname, phone } = body || {}
       const db = getDb()
+      // 服务端必须复刻前端规则：前端校验只是体验，绕过前端时这里是最后一道闸
       if (!username || !password) return fail('用户名和密码不能为空', 400)
+      if (!USERNAME_RULE.pattern.test(username)) return fail(USERNAME_RULE.message, 400)
+      if (!PASSWORD_RULE.pattern.test(password)) return fail(PASSWORD_RULE.message, 400)
+      const nicknameError = checkNickname(nickname)
+      if (nicknameError) return fail(nicknameError, 400)
+      const phoneError = checkPhone(phone)
+      if (phoneError) return fail(phoneError, 400)
       if (db.users.some((u) => u.username === username)) {
         return fail('该用户名已被注册', 400)
       }
@@ -72,8 +80,17 @@ export default [
       const user = currentUser({ headers }, db.users)
       if (!user) return fail('未登录或登录已过期', 401)
       const { nickname, phone, avatar } = body || {}
-      if (nickname !== undefined) user.nickname = nickname
-      if (phone !== undefined) user.phone = phone
+      if (nickname !== undefined) {
+        if (!String(nickname).trim()) return fail('昵称不能为空', 400)
+        const nicknameError = checkNickname(nickname)
+        if (nicknameError) return fail(nicknameError, 400)
+        user.nickname = nickname
+      }
+      if (phone !== undefined) {
+        const phoneError = checkPhone(phone)
+        if (phoneError) return fail(phoneError, 400)
+        user.phone = phone
+      }
       if (avatar !== undefined) user.avatar = avatar
       return ok(publicUser(user))
     }

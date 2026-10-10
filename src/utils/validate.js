@@ -25,6 +25,34 @@ export const PHONE_RULE = {
 }
 
 /**
+ * 昵称最大长度
+ * 说明：页面的 input maxlength 与 Mock 服务端校验共用本常量，避免两处写死后各自漂移
+ */
+export const NICKNAME_MAX = 20
+
+/**
+ * 校验昵称（选填，但填了就必须在长度上限内）
+ * 说明：前端表单可直接用作自定义 validator，Mock 服务端也复用同一实现
+ * @param {*} nickname 昵称
+ * @returns {string|null} 错误信息；null 表示通过
+ */
+export function checkNickname(nickname) {
+  if (nickname === undefined || nickname === null || nickname === '') return null
+  if (String(nickname).length > NICKNAME_MAX) return `昵称不能超过 ${NICKNAME_MAX} 个字符`
+  return null
+}
+
+/**
+ * 校验手机号（选填，但填了就必须合法）
+ * @param {*} phone 手机号
+ * @returns {string|null} 错误信息；null 表示通过
+ */
+export function checkPhone(phone) {
+  if (phone === undefined || phone === null || phone === '') return null
+  return PHONE_RULE.pattern.test(phone) ? null : PHONE_RULE.message
+}
+
+/**
  * 生成必填规则
  * @param {string} label 字段中文名
  * @param {string} [trigger='blur'] 触发方式

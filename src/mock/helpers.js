@@ -1,7 +1,7 @@
 /**
  * Mock 通用工具
  * 职责：统一响应契约、分页、查询参数解析、简易 Token 编解码
- * 说明：本文件位于 mockPath 之外，不会被 vite-plugin-mock 当作接口文件加载
+ * 说明：本文件位于 mockPath（src/mock/modules）之外，不会被 Mock 中间件当作接口文件加载
  */
 import { SUCCESS_CODE } from '../utils/constants.js'
 
@@ -95,6 +95,21 @@ export function currentUser(req, users) {
   const parsed = parseToken(raw)
   if (!parsed) return null
   return users.find((u) => u.id === parsed.id) || null
+}
+
+/**
+ * 校验请求身份：未登录 401、角色不符 403
+ * 约定：所有需要身份的 Mock 接口都在响应函数首行调用本方法，避免逐处手写判断
+ * @param {object} req mock 请求对象（需含 headers）
+ * @param {Array} users 用户表
+ * @param {'admin'|'user'} [needRole] 要求的角色，不传则仅校验登录态
+ * @returns {{user:object|null, error:object|null}} error 非空时应直接将其作为响应返回
+ */
+export function requireUser(req, users, needRole) {
+  const user = currentUser(req, users)
+  if (!user) return { user: null, error: fail('未登录或登录已过期', 401) }
+  if (needRole && user.role !== needRole) return { user: null, error: fail('没有权限访问', 403) }
+  return { user, error: null }
 }
 
 /**

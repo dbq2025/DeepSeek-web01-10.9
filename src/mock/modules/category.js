@@ -3,7 +3,15 @@
  * 对应 api/admin/category.js
  */
 import { getDb } from '../db.js'
-import { ok, fail, paginate, nextId, includesKeyword, formatDateTime } from '../helpers.js'
+import {
+  ok,
+  fail,
+  paginate,
+  nextId,
+  includesKeyword,
+  requireUser,
+  formatDateTime
+} from '../helpers.js'
 
 export default [
   {
@@ -29,8 +37,10 @@ export default [
   {
     url: '/api/category/create',
     method: 'post',
-    response: ({ body }) => {
+    response: ({ body, headers }) => {
       const db = getDb()
+      const { error } = requireUser({ headers }, db.users, 'admin')
+      if (error) return error
       const { name, sort } = body || {}
       if (!name) return fail('类型名称不能为空', 400)
       if (db.categories.some((c) => c.name === name)) return fail('该类型名称已存在', 400)
@@ -47,8 +57,10 @@ export default [
   {
     url: '/api/category/update',
     method: 'put',
-    response: ({ body }) => {
+    response: ({ body, headers }) => {
       const db = getDb()
+      const { error } = requireUser({ headers }, db.users, 'admin')
+      if (error) return error
       const { id, name, sort } = body || {}
       const category = db.categories.find((c) => c.id === Number(id))
       if (!category) return fail('类型不存在', 404)
@@ -65,8 +77,10 @@ export default [
   {
     url: '/api/category/delete',
     method: 'delete',
-    response: ({ query }) => {
+    response: ({ query, headers }) => {
       const db = getDb()
+      const { error } = requireUser({ headers }, db.users, 'admin')
+      if (error) return error
       const id = Number(query?.id)
       const index = db.categories.findIndex((c) => c.id === id)
       if (index === -1) return fail('类型不存在', 404)

@@ -2,7 +2,8 @@
  * 后台管理路由（/admin/*）
  * 结构：/admin/login 独立页 + /admin Layout 嵌套子路由
  * 权限：除 login 外均要求 role = 'admin'
- * 注意：骨架占位 —— 对应的 views/admin/** 页面文件需按此路径创建
+ * 约定：详情 / 编辑页通过 `props: true` 注入路由参数，页面组件必须声明同名 `defineProps` 接收，
+ *      否则参数会作为 $attrs 落到组件根元素上（渲染出多余的 DOM 属性）
  */
 export default [
   {

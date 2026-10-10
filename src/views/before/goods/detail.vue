@@ -91,6 +91,11 @@ import { useCartStore } from '@/store/modules/cart'
 import { useUserStore } from '@/store/modules/user'
 import { formatMoney } from '@/utils/format'
 
+/** 路由参数中的商品 id（由路由配置的 props: true 注入） */
+const props = defineProps({
+  id: { type: [String, Number], required: true }
+})
+
 const route = useRoute()
 const router = useRouter()
 const cartStore = useCartStore()
@@ -116,7 +121,7 @@ function requireLogin() {
 async function loadDetail() {
   loading.value = true
   try {
-    const data = await getFrontGoodsDetailApi(route.params.id)
+    const data = await getFrontGoodsDetailApi(props.id)
     goods.value = data
     count.value = 1
     favorited.value = false
@@ -159,7 +164,7 @@ async function onToggleFavorite() {
   }
 }
 
-watch(() => route.params.id, loadDetail)
+watch(() => props.id, loadDetail)
 onMounted(loadDetail)
 </script>
 

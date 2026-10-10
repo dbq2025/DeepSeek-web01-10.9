@@ -10,16 +10,19 @@ import {
   nextId,
   includesKeyword,
   currentUser,
+  requireUser,
   formatDateTime
 } from '../helpers.js'
 
 export default [
   {
-    // 管理员视角：全部订单
+    // 管理员视角：全部订单（含他人收货信息，必须限管理员）
     url: '/api/order/list',
     method: 'get',
-    response: ({ query }) => {
+    response: ({ query, headers }) => {
       const db = getDb()
+      const { error } = requireUser({ headers }, db.users, 'admin')
+      if (error) return error
       const { page = 1, pageSize = 10, status = '', orderNo = '' } = query || {}
       const filtered = db.orders
         .filter((o) => includesKeyword(o.orderNo, orderNo))
@@ -45,12 +48,18 @@ export default [
     }
   },
   {
+    // 订单详情：仅本人或管理员可见（含收货人姓名 / 手机 / 地址等隐私字段）
     url: '/api/order/detail',
     method: 'get',
-    response: ({ query }) => {
+    response: ({ query, headers }) => {
       const db = getDb()
+      const { user, error } = requireUser({ headers }, db.users)
+      if (error) return error
       const order = db.orders.find((o) => o.id === Number(query?.id))
       if (!order) return fail('订单不存在', 404)
+      if (order.userId !== user.id && user.role !== 'admin') {
+        return fail('无权查看该订单', 403)
+      }
       return ok(order)
     }
   },
@@ -58,8 +67,10 @@ export default [
     // 管理员修改订单状态（发货 / 完成 / 取消）
     url: '/api/order/status',
     method: 'put',
-    response: ({ body }) => {
+    response: ({ body, headers }) => {
       const db = getDb()
+      const { error } = requireUser({ headers }, db.users, 'admin')
+      if (error) return error
       const { id, status } = body || {}
       const order = db.orders.find((o) => o.id === Number(id))
       if (!order) return fail('订单不存在', 404)
@@ -108,31 +119,47 @@ export default [
     }
   },
   {
-    // 前台下单：扣减库存、累加销量
+    // 前台下单：两段式 —— 先全量校验（无副作用），全部通过后再统一扣减库存 / 累加销量。
+    // 目的：避免「循环中途 return fail() 导致前面已扣的库存不回滚」这种非原子写入。
     url: '/api/order/create',
     method: 'post',
     response: ({ body, headers }) => {
       const db = getDb()
-      const user = currentUser({ headers }, db.users)
-      if (!user) return fail('未登录或登录已过期', 401)
+      const { user, error } = requireUser({ headers }, db.users)
+      if (error) return error
       const { items, address } = body || {}
       if (!Array.isArray(items) || items.length === 0) return fail('订单商品不能为空', 400)
 
-      const orderItems = []
+      // ── 第一段：只读校验，不产生任何副作用 ────────────────────────
+      const plan = []
       for (const item of items) {
+        const count = Number(item?.count)
+        // 必须为正整数：拦掉负数（会反向「刷多」库存）、0 与小数
+        if (!Number.isInteger(count) || count <= 0) {
+          return fail('商品数量必须为正整数', 400)
+        }
         const goods = db.goods.find((g) => g.id === Number(item.goodsId))
         if (!goods) return fail(`商品 ${item.goodsId} 不存在`, 400)
-        if (goods.stock < item.count) return fail(`「${goods.name}」库存不足`, 400)
-        goods.stock -= item.count
-        goods.sales += item.count
-        orderItems.push({
+        // 同一商品出现多行时需累计需求量，否则各行分别通过校验、合计却超卖
+        const demanded = plan
+          .filter((p) => p.goods.id === goods.id)
+          .reduce((sum, p) => sum + p.count, 0)
+        if (goods.stock < demanded + count) return fail(`「${goods.name}」库存不足`, 400)
+        plan.push({ goods, count })
+      }
+
+      // ── 第二段：全部校验通过后才写库（等价于事务提交）──────────────
+      const orderItems = plan.map(({ goods, count }) => {
+        goods.stock -= count
+        goods.sales += count
+        return {
           goodsId: goods.id,
           goodsName: goods.name,
           price: goods.price,
-          count: Number(item.count),
+          count,
           cover: goods.cover
-        })
-      }
+        }
+      })
 
       const id = nextId(db.orders)
       const now = new Date()

@@ -2,7 +2,8 @@
  * 电商前台路由
  * 结构：/ Layout 嵌套子路由 + /login、/register 独立页 + 404 兜底
  * 权限：购物车 / 订单 / 收藏 / 个人中心要求登录（role = 'user'）
- * 注意：骨架占位 —— 对应的 views/before/** 页面文件需按此路径创建
+ * 约定：详情页通过 `props: true` 注入路由参数，页面组件必须声明同名 `defineProps` 接收，
+ *      否则参数会作为 $attrs 落到组件根元素上（渲染出多余的 DOM 属性）
  */
 export default [
   {

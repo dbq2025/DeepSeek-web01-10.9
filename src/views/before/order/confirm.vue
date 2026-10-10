@@ -59,12 +59,13 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import EmptyState from '@/components/common/EmptyState.vue'
 import OrderGoodsList from '@/components/before/OrderGoodsList.vue'
 import { createOrderApi } from '@/api/before/order'
+import { getUserProfileApi } from '@/api/before/auth'
 import { useCartStore } from '@/store/modules/cart'
 import { useUserStore } from '@/store/modules/user'
 import { PHONE_RULE, required } from '@/utils/validate'
@@ -114,10 +115,31 @@ async function onSubmit() {
   }
 }
 
-onMounted(() => {
-  const profile = userStore.profile || {}
-  form.name = profile.nickname || ''
-  form.phone = profile.phone || ''
+/**
+ * 用当前用户资料预填收货信息
+ * 说明：只填充空字段，不覆盖用户已输入的内容
+ * @param {object|null} profile 用户资料
+ * @returns {void}
+ */
+function fillFromProfile(profile) {
+  if (!profile) return
+  form.name = form.name || profile.nickname || ''
+  form.phone = form.phone || profile.phone || ''
+}
+
+// 登录态只持久化 token / role，刷新后 profile 为空；而父布局补拉资料是异步的，
+// 且子组件的 onMounted 早于父组件执行 —— 只在 onMounted 里读一次会导致硬刷新时
+// 收货人 / 手机号必定为空。故用 watch + immediate 兜住「资料迟到」，并在本页自行补拉，
+// 使本页不依赖父布局的副作用。
+watch(() => userStore.profile, fillFromProfile, { immediate: true })
+
+onMounted(async () => {
+  if (!userStore.isLogin || userStore.profile) return
+  try {
+    userStore.updateProfile(await getUserProfileApi())
+  } catch (error) {
+    // 登录态异常由 request.js 统一处理
+  }
 })
 </script>
 
