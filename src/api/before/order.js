@@ -32,6 +32,24 @@ export function createOrderApi(data) {
 }
 
 /**
+ * 模拟付款（待付款 → 待发货）
+ * @param {number} id 订单 id
+ * @returns {Promise<object>}
+ */
+export function payOrderApi(id) {
+  return request.put('/order/pay', { id })
+}
+
+/**
+ * 取消订单（待付款 → 已取消，Mock 端会回滚库存与销量）
+ * @param {number} id 订单 id
+ * @returns {Promise<object>}
+ */
+export function cancelOrderApi(id) {
+  return request.put('/order/cancel', { id })
+}
+
+/**
  * 查询我的收藏列表
  * @returns {Promise<Array>}
  */

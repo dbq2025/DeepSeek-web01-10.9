@@ -16,18 +16,39 @@ function withCategoryName(goods, categories) {
   return { ...goods, categoryName: category ? category.name : '未分类' }
 }
 
+/**
+ * 商品排序策略（前台搜索页使用；未命中策略时退回「按 id 倒序」）
+ * @param {string} sortBy 排序标识
+ * @returns {(a:object,b:object)=>number}
+ */
+function resolveSorter(sortBy) {
+  const map = {
+    priceAsc: (a, b) => a.price - b.price,
+    priceDesc: (a, b) => b.price - a.price,
+    salesDesc: (a, b) => b.sales - a.sales
+  }
+  return map[sortBy] || ((a, b) => b.id - a.id)
+}
+
 export default [
   {
     url: '/api/goods/list',
     method: 'get',
     response: ({ query }) => {
       const db = getDb()
-      const { page = 1, pageSize = 10, name = '', categoryId = '', status = '' } = query || {}
+      const {
+        page = 1,
+        pageSize = 10,
+        name = '',
+        categoryId = '',
+        status = '',
+        sortBy = ''
+      } = query || {}
       const filtered = db.goods
         .filter((g) => includesKeyword(g.name, name))
         .filter((g) => (categoryId === '' || categoryId === undefined ? true : g.categoryId === Number(categoryId)))
         .filter((g) => (status === '' || status === undefined ? true : g.status === Number(status)))
-        .sort((a, b) => b.id - a.id)
+        .sort(resolveSorter(sortBy))
         .map((g) => withCategoryName(g, db.categories))
       return ok(paginate(filtered, page, pageSize))
     }

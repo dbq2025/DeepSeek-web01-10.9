@@ -412,6 +412,37 @@ meta: { title: '管理员登录', guestOnly: true, guestRedirect: '/admin/dashbo
 
 ---
 
+## 附录 E：业务组件清单（`components/admin/` 与 `components/before/`）
+
+> 与附录 D 的区别：这些组件**绑定了具体业务**（读 store、发请求、带路由跳转），
+> 因此不允许跨子系统复用（后台不能 import 前台的业务组件，反之亦然）。
+
+### `components/admin/`（后台专用）
+
+| 组件 | 职责 | 关键 props | 事件 / 插槽 |
+| --- | --- | --- | --- |
+| `StatCard` | 数据统计指标卡 | `label`、`value`、`unit`、`icon`、`color`、`loading` | — |
+| `SidebarCom` | 后台侧边菜单 | `collapsed` | 菜单项**由路由表 `meta.icon` + `meta.title` 自动生成**，新增页面无需改此组件 |
+| `HeaderCom` | 顶栏（折叠 / 面包屑 / 用户下拉） | — | 内置退出登录；`ICON_MAP` 白名单维护图标 |
+
+### `components/before/`（前台专用）
+
+| 组件 | 职责 | 关键 props | 事件 / 插槽 |
+| --- | --- | --- | --- |
+| `GoodsCard` | 商品卡片 | `goods`（必填）、`showActions` | `@add-cart`；插槽 `#actions`（自定义底部操作，与默认加购按钮并存） |
+| `AuthShell` | 登录 / 注册页共用外壳 | `title`、`subtitle` | 默认插槽放表单；`#foot` 插槽放底部链接 |
+
+> `SidebarCom` 自动生成菜单的实现：读取 `router.options.routes` 中 `path === '/admin'` 的 `children`，
+> 过滤出同时具备 `meta.icon` 与 `meta.title` 的路由。**新增后台页面只要补这两个 meta 字段即可上菜单。**
+
+**硬性约束**
+1. 业务组件**可以**读 store / 调 api / 用 router，但**不得**被另一子系统引用。
+2. 页面内的重复区块（同一文件出现 ≥ 2 次）必须抽成业务组件，例如
+   `views/before/order/OrderCard.vue`（订单卡片）、`views/before/goods/GoodsIntro.vue`（商品介绍）。
+3. 业务组件同样受第 2.3 节拆分阈值约束（单文件 > 300 行必须拆）。
+
+---
+
 *本规范由团队共同维护；任何修改需经 review 后合并，并在文末修订记录登记。*
 
 | 版本 | 日期 | 修订内容 | 修订人 |
@@ -419,3 +450,4 @@ meta: { title: '管理员登录', guestOnly: true, guestRedirect: '/admin/dashbo
 | v1.0 | 2026-10-09 | 初版 | — |
 | v1.1 | 2026-10-09 | Mock 方案由 `vite-plugin-mock` 改为自研中间件，附录 C 重写 | — |
 | v1.2 | 2026-10-09 | 新增附录 D（通用组件契约）；第 7 章补充 SCSS 全局注入与 Element Plus 引入方式 | — |
+| v1.3 | 2026-10-10 | 第 6.2/6.3 节补齐路由 meta 字段表与守卫执行顺序；新增附录 E（前后台业务组件清单） | — |

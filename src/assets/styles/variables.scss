@@ -9,11 +9,21 @@ $color-success: #67c23a;
 $color-warning: #e6a23c;
 $color-danger: #f56c6c;
 
+// 电商语义色
+// 说明：国内电商惯例用红色突出商品价格，与 Element Plus 的 danger 色刻意区分，
+//      便于后续整体调整价格视觉而不影响错误提示色
+$color-price: #e93b3d;
+
 // 文本与边框
 $text-primary: #303133;
 $text-regular: #606266;
 $text-secondary: #909399;
 $border-color: #dcdfe6;
+
+// 布局尺寸
+$container-width: 1200px; // 前台内容区最大宽度
+$header-height: 64px; // 前台顶栏高度
+$footer-height: 92px; // 前台页脚高度
 
 // 响应式断点（与 CLAUDE.md 第 7 章一致）
 $breakpoint-sm: 768px;

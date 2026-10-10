@@ -60,6 +60,46 @@ export default [
     }
   },
   {
+    // 前台模拟付款：待付款 → 待发货（仅限本人订单）
+    url: '/api/order/pay',
+    method: 'put',
+    response: ({ body, headers }) => {
+      const db = getDb()
+      const user = currentUser({ headers }, db.users)
+      if (!user) return fail('未登录或登录已过期', 401)
+      const order = db.orders.find((o) => o.id === Number(body?.id))
+      if (!order) return fail('订单不存在', 404)
+      if (order.userId !== user.id) return fail('无权操作该订单', 403)
+      if (order.status !== 0) return fail('该订单当前状态无法付款', 400)
+      order.status = 1
+      return ok(order)
+    }
+  },
+  {
+    // 前台取消订单：待付款 → 已取消，并把下单时扣掉的库存 / 销量回滚（仅限本人）
+    url: '/api/order/cancel',
+    method: 'put',
+    response: ({ body, headers }) => {
+      const db = getDb()
+      const user = currentUser({ headers }, db.users)
+      if (!user) return fail('未登录或登录已过期', 401)
+      const order = db.orders.find((o) => o.id === Number(body?.id))
+      if (!order) return fail('订单不存在', 404)
+      if (order.userId !== user.id) return fail('无权操作该订单', 403)
+      if (order.status !== 0) return fail('只有待付款的订单可以取消', 400)
+
+      order.items.forEach((item) => {
+        const goods = db.goods.find((g) => g.id === item.goodsId)
+        if (goods) {
+          goods.stock += item.count
+          goods.sales = Math.max(0, goods.sales - item.count)
+        }
+      })
+      order.status = 4
+      return ok(order)
+    }
+  },
+  {
     // 前台下单：扣减库存、累加销量
     url: '/api/order/create',
     method: 'post',
