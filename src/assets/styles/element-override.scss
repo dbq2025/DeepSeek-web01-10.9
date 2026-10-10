@@ -1,7 +1,12 @@
 /**
  * Element Plus 主题覆盖
  * 说明：通过 CSS 变量覆盖组件库默认样式，禁止直接改 element-plus 源码
+ * 注意：本文件由 index.scss 以 @use 引入，属于独立编译单元，
+ *      不会获得 vite.config.js 的 additionalData 注入，故需自行 @use 变量文件
+ *      （SCSS 模块有加载缓存，不会与注入的那次重复加载冲突）
  */
+@use 'variables' as *;
+
 :root {
-  --el-color-primary: #409eff;
+  --el-color-primary: #{$color-primary};
 }

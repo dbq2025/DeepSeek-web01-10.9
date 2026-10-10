@@ -130,11 +130,15 @@ async function loadDetail() {
 async function onChangeStatus(status) {
   const text = ORDER_STATUS_TEXT[status]
   try {
-    await ElMessageBox.confirm(`确定将订单「${order.value.orderNo}」标记为「${text}」吗？`, '操作确认', {
-      type: 'warning',
-      confirmButtonText: `确定${text}`,
-      cancelButtonText: '取消'
-    })
+    await ElMessageBox.confirm(
+      `确定将订单「${order.value.orderNo}」标记为「${text}」吗？`,
+      '操作确认',
+      {
+        type: 'warning',
+        confirmButtonText: `确定${text}`,
+        cancelButtonText: '取消'
+      }
+    )
   } catch {
     return // 用户取消
   }

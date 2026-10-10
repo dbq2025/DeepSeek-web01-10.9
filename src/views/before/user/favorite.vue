@@ -9,14 +9,14 @@
 
     <div v-loading="loading" class="favorite__body">
       <div v-if="list.length" class="favorite__grid">
-        <GoodsCard
-          v-for="item in list"
-          :key="item.id"
-          :goods="item"
-          :show-actions="false"
-        >
+        <GoodsCard v-for="item in list" :key="item.id" :goods="item" :show-actions="false">
           <template #actions>
-            <el-button type="primary" size="small" :disabled="item.status !== 1" @click.stop="onAddCart(item)">
+            <el-button
+              type="primary"
+              size="small"
+              :disabled="item.status !== 1"
+              @click.stop="onAddCart(item)"
+            >
               加入购物车
             </el-button>
             <el-button size="small" @click.stop="onUnfavorite(item)">取消收藏</el-button>
@@ -24,6 +24,7 @@
         </GoodsCard>
       </div>
 
+      <EmptyState v-else-if="!loading && error" type="error" @retry="loadFavorites" />
       <EmptyState v-else-if="!loading" description="还没有收藏任何商品">
         <el-button type="primary" @click="router.push('/search')">去挑几件</el-button>
       </EmptyState>
@@ -45,15 +46,19 @@ const cartStore = useCartStore()
 
 const loading = ref(true)
 const list = ref([])
+/** 加载失败时的错误对象 */
+const error = ref(null)
 
 /** 加载收藏列表（转成商品数组） */
 async function loadFavorites() {
   loading.value = true
+  error.value = null
   try {
     const data = await getFavoriteListApi()
     list.value = (data || []).map((item) => item.goods).filter(Boolean)
-  } catch (error) {
+  } catch (err) {
     list.value = []
+    error.value = err
   } finally {
     loading.value = false
   }
@@ -69,7 +74,7 @@ async function onUnfavorite(goods) {
     await toggleFavoriteApi(goods.id)
     ElMessage.success('已取消收藏')
     await loadFavorites()
-  } catch (error) {
+  } catch {
     // 失败提示由 request.js 统一处理
   }
 }

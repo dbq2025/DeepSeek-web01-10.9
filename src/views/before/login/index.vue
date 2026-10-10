@@ -45,9 +45,7 @@
     </el-alert>
 
     <template #foot>
-      <p class="login__foot-row">
-        还没有账号？<router-link to="/register">立即注册</router-link>
-      </p>
+      <p class="login__foot-row">还没有账号？<router-link to="/register">立即注册</router-link></p>
       <p class="login__foot-row">
         <router-link to="/admin/login">管理员入口 →</router-link>
       </p>

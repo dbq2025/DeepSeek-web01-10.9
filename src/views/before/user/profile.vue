@@ -9,7 +9,9 @@
     <h2 class="profile__title">个人信息</h2>
 
     <section class="profile__panel">
+      <el-skeleton v-if="loading" :rows="6" animated />
       <el-form
+        v-else
         ref="formRef"
         :model="form"
         :rules="rules"
@@ -25,7 +27,12 @@
         </el-form-item>
 
         <el-form-item label="昵称" prop="nickname">
-          <el-input v-model="form.nickname" placeholder="请输入昵称" maxlength="20" show-word-limit />
+          <el-input
+            v-model="form.nickname"
+            placeholder="请输入昵称"
+            maxlength="20"
+            show-word-limit
+          />
         </el-form-item>
 
         <el-form-item label="手机号" prop="phone">
@@ -58,6 +65,7 @@ const userStore = useUserStore()
 
 const formRef = ref(null)
 const saving = ref(false)
+const loading = ref(true)
 
 /** 展示用资料（store 为准，缺失时由下面接口补齐） */
 const profile = computed(() => userStore.profile || {})
@@ -99,15 +107,18 @@ async function onSave() {
 }
 
 onMounted(async () => {
-  if (!userStore.profile) {
-    try {
+  try {
+    if (!userStore.profile) {
       const data = await getUserProfileApi()
       userStore.updateProfile(data)
-    } catch (error) {
-      // 登录态异常由 request.js 统一处理
     }
+  } catch {
+    // 登录态异常由 request.js 统一处理
+  } finally {
+    // 无论成功失败都回填表单，避免骨架屏卡住
+    syncFromStore()
+    loading.value = false
   }
-  syncFromStore()
 })
 </script>
 

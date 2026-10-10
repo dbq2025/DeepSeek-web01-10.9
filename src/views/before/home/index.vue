@@ -23,7 +23,10 @@
           class="home__cat"
           :to="{ path: '/search', query: { categoryId: item.id } }"
         >
-          <span class="home__cat-dot" :style="{ background: dotColors[index % dotColors.length] }" />
+          <span
+            class="home__cat-dot"
+            :style="{ background: dotColors[index % dotColors.length] }"
+          />
           <span class="home__cat-name">{{ item.name }}</span>
         </router-link>
       </div>
@@ -192,6 +195,14 @@ onMounted(loadHomeData)
 
   .home__cats {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  // 轮播原图比例 1200:360（见 mock/db.js 的 buildBanner）。
+  // 窄屏若沿用固定高度 300px，cover 会把左右两侧裁掉导致标题不完整；
+  // 这里让容器高度随宽度按原图比例计算，保证整图可见。
+  .home__carousel :deep(.el-carousel__container) {
+    height: auto !important;
+    aspect-ratio: 10 / 3;
   }
 }
 </style>

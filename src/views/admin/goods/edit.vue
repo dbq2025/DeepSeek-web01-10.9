@@ -30,7 +30,11 @@
         </el-form-item>
 
         <el-form-item label="商品类型" prop="categoryId">
-          <el-select v-model="form.categoryId" class="goods-edit__field" placeholder="请选择商品类型">
+          <el-select
+            v-model="form.categoryId"
+            class="goods-edit__field"
+            placeholder="请选择商品类型"
+          >
             <el-option
               v-for="opt in categoryStore.options"
               :key="opt.value"

@@ -27,7 +27,8 @@
         @cancel="onCancel"
       />
 
-      <EmptyState v-if="!loading && !list.length" description="暂无相关订单">
+      <EmptyState v-if="!loading && error" type="error" @retry="load" />
+      <EmptyState v-else-if="!loading && !list.length" description="暂无相关订单">
         <el-button type="primary" @click="router.push('/home')">去逛逛</el-button>
       </EmptyState>
     </div>
@@ -62,7 +63,7 @@ const statusTabs = Object.keys(ORDER_STATUS_TEXT).map((key) => ({
   label: ORDER_STATUS_TEXT[key]
 }))
 
-const { loading, list, total, query, load, search, changePage, changeSize } = useTable(
+const { loading, error, list, total, query, load, search, changePage, changeSize } = useTable(
   getMyOrdersApi,
   { defaultQuery: { status: '' }, pageSize: 5 }
 )
@@ -86,7 +87,7 @@ async function onPay(order) {
     await payOrderApi(order.id)
     ElMessage.success('付款成功')
     await load()
-  } catch (error) {
+  } catch {
     // 失败提示由 request.js 统一处理
   }
 }
@@ -111,7 +112,7 @@ async function onCancel(order) {
     await cancelOrderApi(order.id)
     ElMessage.success('订单已取消')
     await load()
-  } catch (error) {
+  } catch {
     // 失败提示由 request.js 统一处理
   }
 }

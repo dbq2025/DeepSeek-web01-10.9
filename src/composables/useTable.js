@@ -2,8 +2,10 @@
  * 列表通用逻辑（组合函数）
  * 职责：统一「筛选条件 + 分页 + 加载态 + 数据加载」，供后台各列表页复用
  * 用法：
- *   const { loading, list, total, query, load, search, reset, changePage, changeSize } =
+ *   const { loading, error, list, total, query, load, search, reset, changePage, changeSize } =
  *     useTable(getGoodsListApi, { defaultQuery: { name: '', categoryId: '' } })
+ * 三态约定：loading → 骨架屏 / v-loading；error → <EmptyState type="error" @retry="load" />；
+ *          list 为空 → <EmptyState description="..." />
  */
 import { ref, reactive, onMounted } from 'vue'
 
@@ -21,6 +23,8 @@ export function useTable(fetchApi, options = {}) {
   const loading = ref(false)
   const list = ref([])
   const total = ref(0)
+  /** 加载失败时的错误对象（null 表示无错误）；供页面渲染错误态与重试 */
+  const error = ref(null)
 
   /** 查询参数（page / pageSize + 业务筛选条件） */
   const query = reactive({ page: 1, pageSize, ...defaultQuery })
@@ -38,16 +42,18 @@ export function useTable(fetchApi, options = {}) {
     return params
   }
 
-  /** 按当前条件加载数据 */
+  /** 按当前条件加载数据（失败时记录 error 供页面展示错误态） */
   async function load() {
     loading.value = true
+    error.value = null
     try {
       const data = await fetchApi(normalizeParams())
       list.value = data?.list || []
       total.value = data?.total || 0
-    } catch (error) {
+    } catch (err) {
       list.value = []
       total.value = 0
+      error.value = err
     } finally {
       loading.value = false
     }
@@ -88,5 +94,5 @@ export function useTable(fetchApi, options = {}) {
     onMounted(load)
   }
 
-  return { loading, list, total, query, load, search, reset, changePage, changeSize }
+  return { loading, error, list, total, query, load, search, reset, changePage, changeSize }
 }

@@ -56,9 +56,7 @@ const props = defineProps({
 const emit = defineEmits(['detail', 'pay', 'cancel'])
 
 /** 商品总件数 */
-const totalCount = computed(() =>
-  (props.order.items || []).reduce((sum, it) => sum + it.count, 0)
-)
+const totalCount = computed(() => (props.order.items || []).reduce((sum, it) => sum + it.count, 0))
 
 /** 是否待付款 */
 const isUnpaid = computed(() => props.order.status === ORDER_STATUS.UNPAID)

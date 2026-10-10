@@ -17,13 +17,12 @@
     </SearchForm>
 
     <section class="category__panel">
-      <DataTable
-        :columns="columns"
-        :data="list"
-        :loading="loading"
-        show-index
-        empty-text="暂无商品类型"
-      >
+      <DataTable :columns="columns" :data="list" :loading="loading" show-index>
+        <template #empty>
+          <EmptyState v-if="error" type="error" @retry="load" />
+          <EmptyState v-else description="暂无商品类型" />
+        </template>
+
         <template #action="{ row }">
           <el-button link type="primary" @click="openForm(row)">编辑</el-button>
           <el-button link type="danger" @click="onDelete(row)">删除</el-button>
@@ -65,6 +64,7 @@ import SearchForm from '@/components/common/SearchForm.vue'
 import DataTable from '@/components/common/DataTable.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import FormDialog from '@/components/common/FormDialog.vue'
+import EmptyState from '@/components/common/EmptyState.vue'
 import { useTable } from '@/composables/useTable'
 import { useDialog } from '@/composables/useDialog'
 import { useCategoryStore } from '@/store/modules/category'
@@ -78,12 +78,11 @@ import { nonNegativeInteger, required } from '@/utils/validate'
 
 const categoryStore = useCategoryStore()
 
-const { loading, list, total, query, load, search, reset, changePage, changeSize } = useTable(
-  getCategoryListApi,
-  { defaultQuery: { name: '' }, pageSize: 10 }
-)
+const { loading, error, list, total, query, load, search, reset, changePage, changeSize } =
+  useTable(getCategoryListApi, { defaultQuery: { name: '' }, pageSize: 10 })
 
-const { visible, isEdit, row, title, open, close } = useDialog('商品类型')
+// 重命名为 editingRow：避免与 <template #action="{ row }"> 的插槽作用域变量同名（vue/no-template-shadow）
+const { visible, isEdit, row: editingRow, title, open, close } = useDialog('商品类型')
 
 const saving = ref(false)
 const form = reactive({ name: '', sort: 1 })
@@ -116,8 +115,8 @@ function openForm(payload = null) {
 async function onSave() {
   saving.value = true
   try {
-    if (isEdit.value && row.value) {
-      await updateCategoryApi({ ...form, id: row.value.id })
+    if (isEdit.value && editingRow.value) {
+      await updateCategoryApi({ ...form, id: editingRow.value.id })
       ElMessage.success('修改成功')
     } else {
       await createCategoryApi({ ...form })
@@ -126,7 +125,7 @@ async function onSave() {
     close()
     categoryStore.reset()
     await load()
-  } catch (error) {
+  } catch {
     // 失败提示已由 request.js 统一处理（如「该类型名称已存在」）
   } finally {
     saving.value = false
@@ -154,7 +153,7 @@ async function onDelete(target) {
     ElMessage.success('删除成功')
     categoryStore.reset()
     await load()
-  } catch (error) {
+  } catch {
     // 失败提示已由 request.js 统一处理（如「该类型下仍有商品，无法删除」）
   }
 }

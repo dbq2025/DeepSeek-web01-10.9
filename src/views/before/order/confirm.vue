@@ -42,25 +42,7 @@
 
       <section class="confirm__panel">
         <h3 class="confirm__subtitle">商品明细</h3>
-        <el-table :data="cartStore.checkedItems" border>
-          <el-table-column label="商品信息" min-width="300">
-            <template #default="{ row }">
-              <div class="confirm__goods">
-                <img class="confirm__goods-img" :src="row.cover" :alt="row.goodsName" />
-                <span>{{ row.goodsName }}</span>
-              </div>
-            </template>
-          </el-table-column>
-          <el-table-column label="单价" width="140">
-            <template #default="{ row }">{{ formatMoney(row.price) }}</template>
-          </el-table-column>
-          <el-table-column prop="count" label="数量" width="100" align="center" />
-          <el-table-column label="小计" width="150">
-            <template #default="{ row }">
-              <span class="confirm__subtotal">{{ formatMoney(row.price * row.count) }}</span>
-            </template>
-          </el-table-column>
-        </el-table>
+        <OrderGoodsList :items="cartStore.checkedItems" />
       </section>
 
       <div class="confirm__bar">
@@ -81,6 +63,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import EmptyState from '@/components/common/EmptyState.vue'
+import OrderGoodsList from '@/components/before/OrderGoodsList.vue'
 import { createOrderApi } from '@/api/before/order'
 import { useCartStore } from '@/store/modules/cart'
 import { useUserStore } from '@/store/modules/user'
@@ -104,9 +87,7 @@ const rules = {
 }
 
 /** 待结算商品总件数 */
-const totalCount = computed(() =>
-  cartStore.checkedItems.reduce((sum, it) => sum + it.count, 0)
-)
+const totalCount = computed(() => cartStore.checkedItems.reduce((sum, it) => sum + it.count, 0))
 
 /** 提交订单：校验通过后调用下单接口 */
 async function onSubmit() {
@@ -172,26 +153,6 @@ onMounted(() => {
   &__form {
     max-width: 620px;
     padding-bottom: 10px;
-  }
-
-  &__goods {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: var(--el-text-color-primary);
-  }
-
-  &__goods-img {
-    width: 56px;
-    height: 56px;
-    flex: none;
-    border-radius: 6px;
-    object-fit: cover;
-  }
-
-  &__subtotal {
-    color: $color-price;
-    font-weight: 600;
   }
 
   &__bar {

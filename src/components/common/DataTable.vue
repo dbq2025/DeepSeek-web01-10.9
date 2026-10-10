@@ -62,7 +62,10 @@
     </el-table-column>
 
     <template #empty>
-      <EmptyState :description="emptyText" />
+      <!-- 允许父级覆盖空状态（例如换成「加载失败 + 重试」），未覆盖时用 emptyText -->
+      <slot name="empty">
+        <EmptyState :description="emptyText" />
+      </slot>
     </template>
   </el-table>
 </template>

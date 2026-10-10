@@ -58,7 +58,9 @@ export default [
       const user = currentUser({ headers }, db.users)
       if (!user) return ok({ favorited: false })
       const goodsId = Number(query?.goodsId)
-      return ok({ favorited: db.favorites.some((f) => f.userId === user.id && f.goodsId === goodsId) })
+      return ok({
+        favorited: db.favorites.some((f) => f.userId === user.id && f.goodsId === goodsId)
+      })
     }
   }
 ]

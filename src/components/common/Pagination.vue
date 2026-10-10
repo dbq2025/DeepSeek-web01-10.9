@@ -70,4 +70,18 @@ function onSizeChange(size) {
   justify-content: flex-end;
   padding: 12px 0 4px;
 }
+
+// 窄屏：el-pagination 整块宽度约 450px，靠 flex-end 会向左侧溢出并被裁切。
+// 改为从左排布 + 允许换行，让「总数 / 每页条数」与「页码 / 跳转」分两行展示。
+@include respond-below('sm') {
+  .pagination {
+    justify-content: flex-start;
+
+    :deep(.el-pagination) {
+      flex-wrap: wrap;
+      row-gap: 8px;
+      width: 100%;
+    }
+  }
+}
 </style>

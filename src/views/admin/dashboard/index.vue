@@ -51,10 +51,33 @@ const pieChart = useEcharts(pieRef)
 
 /** 指标卡片配置（图标与配色统一在此维护） */
 const overviewCards = computed(() => [
-  { label: '商品总数', value: overview.value.goodsCount, unit: '件', icon: Goods, color: 'var(--el-color-primary)' },
-  { label: '上架商品', value: overview.value.onSaleCount, unit: '件', icon: Sell, color: 'var(--el-color-success)' },
-  { label: '订单总数', value: overview.value.orderCount, unit: '笔', icon: List, color: 'var(--el-color-warning)' },
-  { label: '销售总额', value: formatMoney(overview.value.totalAmount), icon: Money, color: 'var(--el-color-danger)' }
+  {
+    label: '商品总数',
+    value: overview.value.goodsCount,
+    unit: '件',
+    icon: Goods,
+    color: 'var(--el-color-primary)'
+  },
+  {
+    label: '上架商品',
+    value: overview.value.onSaleCount,
+    unit: '件',
+    icon: Sell,
+    color: 'var(--el-color-success)'
+  },
+  {
+    label: '订单总数',
+    value: overview.value.orderCount,
+    unit: '笔',
+    icon: List,
+    color: 'var(--el-color-warning)'
+  },
+  {
+    label: '销售总额',
+    value: formatMoney(overview.value.totalAmount),
+    icon: Money,
+    color: 'var(--el-color-danger)'
+  }
 ])
 
 /**

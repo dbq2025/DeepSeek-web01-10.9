@@ -21,13 +21,23 @@
       <h3 class="profile__subtitle">资料修改</h3>
       <el-form ref="formRef" class="profile__form" :model="form" :rules="rules" label-width="96px">
         <el-form-item label="昵称" prop="nickname">
-          <el-input v-model="form.nickname" placeholder="请输入昵称" maxlength="20" show-word-limit />
+          <el-input
+            v-model="form.nickname"
+            placeholder="请输入昵称"
+            maxlength="20"
+            show-word-limit
+          />
         </el-form-item>
         <el-form-item label="手机号" prop="phone">
           <el-input v-model="form.phone" placeholder="请输入手机号" maxlength="11" />
         </el-form-item>
         <el-form-item label="头像" prop="avatar">
-          <ImageUpload v-model="form.avatar" width="120px" height="120px" tip="支持 jpg / png，2MB 以内" />
+          <ImageUpload
+            v-model="form.avatar"
+            width="120px"
+            height="120px"
+            tip="支持 jpg / png，2MB 以内"
+          />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" :loading="saving" @click="onSubmit">保存</el-button>

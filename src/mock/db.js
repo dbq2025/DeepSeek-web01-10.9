@@ -24,12 +24,42 @@ const CATEGORY_SEED = [
 
 /** 各类型下的商品名与价格区间 */
 const GOODS_SEED = {
-  1: { names: ['旗舰智能手机 Pro', '无线降噪蓝牙耳机', '高性能平板电脑', '机械键盘 87 键', '20000mAh 移动电源'], price: [199, 6999] },
-  2: { names: ['一级能效变频空调', '滚筒全自动洗衣机', '对开门大容量冰箱', '激光导航扫地机器人', '除甲醛空气净化器'], price: [899, 5299] },
-  3: { names: ['纯棉圆领 T 恤', '轻量缓震运动鞋', '大容量双肩背包', '轻薄羽绒服'], price: [59, 899] },
-  4: { names: ['有机纯牛奶整箱', '进口每日坚果礼盒', '阳澄湖大闸蟹礼券', '新疆特级红枣'], price: [39, 599] },
-  5: { names: ['《JavaScript 高级程序设计》', '《Vue.js 设计与实现》', '儿童科普绘本套装'], price: [29, 169] },
-  6: { names: ['碳纤维登山杖', '专业防滑瑜伽垫', '户外露营帐篷', '速干跑步套装'], price: [45, 1299] }
+  1: {
+    names: [
+      '旗舰智能手机 Pro',
+      '无线降噪蓝牙耳机',
+      '高性能平板电脑',
+      '机械键盘 87 键',
+      '20000mAh 移动电源'
+    ],
+    price: [199, 6999]
+  },
+  2: {
+    names: [
+      '一级能效变频空调',
+      '滚筒全自动洗衣机',
+      '对开门大容量冰箱',
+      '激光导航扫地机器人',
+      '除甲醛空气净化器'
+    ],
+    price: [899, 5299]
+  },
+  3: {
+    names: ['纯棉圆领 T 恤', '轻量缓震运动鞋', '大容量双肩背包', '轻薄羽绒服'],
+    price: [59, 899]
+  },
+  4: {
+    names: ['有机纯牛奶整箱', '进口每日坚果礼盒', '阳澄湖大闸蟹礼券', '新疆特级红枣'],
+    price: [39, 599]
+  },
+  5: {
+    names: ['《JavaScript 高级程序设计》', '《Vue.js 设计与实现》', '儿童科普绘本套装'],
+    price: [29, 169]
+  },
+  6: {
+    names: ['碳纤维登山杖', '专业防滑瑜伽垫', '户外露营帐篷', '速干跑步套装'],
+    price: [45, 1299]
+  }
 }
 
 /**
@@ -144,10 +174,46 @@ function createSeed() {
 
   // ── 用户 ──────────────────────────────────────────────
   const users = [
-    { id: 1, username: 'admin', password: '123456', role: 'admin', nickname: '系统管理员', phone: '13800000001', avatar: '', createTime: '2026-01-01 09:00:00' },
-    { id: 2, username: 'test', password: '123456', role: 'user', nickname: '测试用户', phone: '13800000002', avatar: '', createTime: '2026-02-14 09:00:00' },
-    { id: 3, username: 'lisi', password: '123456', role: 'user', nickname: '李四', phone: '13800000003', avatar: '', createTime: '2026-03-02 09:00:00' },
-    { id: 4, username: 'wangwu', password: '123456', role: 'user', nickname: '王五', phone: '13800000004', avatar: '', createTime: '2026-03-18 09:00:00' }
+    {
+      id: 1,
+      username: 'admin',
+      password: '123456',
+      role: 'admin',
+      nickname: '系统管理员',
+      phone: '13800000001',
+      avatar: '',
+      createTime: '2026-01-01 09:00:00'
+    },
+    {
+      id: 2,
+      username: 'test',
+      password: '123456',
+      role: 'user',
+      nickname: '测试用户',
+      phone: '13800000002',
+      avatar: '',
+      createTime: '2026-02-14 09:00:00'
+    },
+    {
+      id: 3,
+      username: 'lisi',
+      password: '123456',
+      role: 'user',
+      nickname: '李四',
+      phone: '13800000003',
+      avatar: '',
+      createTime: '2026-03-02 09:00:00'
+    },
+    {
+      id: 4,
+      username: 'wangwu',
+      password: '123456',
+      role: 'user',
+      nickname: '王五',
+      phone: '13800000004',
+      avatar: '',
+      createTime: '2026-03-18 09:00:00'
+    }
   ]
   const buyers = users.filter((u) => u.role === 'user')
 
@@ -205,7 +271,12 @@ function createSeed() {
       if (picked.has(g.id)) continue
       picked.add(g.id)
       favoriteId += 1
-      favorites.push({ id: favoriteId, userId: user.id, goodsId: g.id, createTime: '2026-09-20 12:00:00' })
+      favorites.push({
+        id: favoriteId,
+        userId: user.id,
+        goodsId: g.id,
+        createTime: '2026-09-20 12:00:00'
+      })
     }
   })
 
@@ -216,9 +287,24 @@ function createSeed() {
     users,
     favorites,
     banners: [
-      { id: 1, title: '新机首发 · 至高立减 800 元', image: buildBanner('新机首发 · 至高立减 800 元', 1), sort: 1 },
-      { id: 2, title: '家电焕新季 · 满 3000 减 300', image: buildBanner('家电焕新季 · 满 3000 减 300', 2), sort: 2 },
-      { id: 3, title: '秋季出行 · 户外装备 5 折起', image: buildBanner('秋季出行 · 户外装备 5 折起', 3), sort: 3 }
+      {
+        id: 1,
+        title: '新机首发 · 至高立减 800 元',
+        image: buildBanner('新机首发 · 至高立减 800 元', 1),
+        sort: 1
+      },
+      {
+        id: 2,
+        title: '家电焕新季 · 满 3000 减 300',
+        image: buildBanner('家电焕新季 · 满 3000 减 300', 2),
+        sort: 2
+      },
+      {
+        id: 3,
+        title: '秋季出行 · 户外装备 5 折起',
+        image: buildBanner('秋季出行 · 户外装备 5 折起', 3),
+        sort: 3
+      }
     ]
   }
 }

@@ -41,8 +41,6 @@ const text = computed(() =>
 
 /** Element Plus tag 类型 */
 const tagType = computed(() =>
-  props.kind === 'goods'
-    ? GOODS_TAG_TYPE[props.status] || 'info'
-    : orderStatusTagType(props.status)
+  props.kind === 'goods' ? GOODS_TAG_TYPE[props.status] || 'info' : orderStatusTagType(props.status)
 )
 </script>

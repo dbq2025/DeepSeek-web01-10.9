@@ -46,7 +46,9 @@ export default [
       } = query || {}
       const filtered = db.goods
         .filter((g) => includesKeyword(g.name, name))
-        .filter((g) => (categoryId === '' || categoryId === undefined ? true : g.categoryId === Number(categoryId)))
+        .filter((g) =>
+          categoryId === '' || categoryId === undefined ? true : g.categoryId === Number(categoryId)
+        )
         .filter((g) => (status === '' || status === undefined ? true : g.status === Number(status)))
         .sort(resolveSorter(sortBy))
         .map((g) => withCategoryName(g, db.categories))

@@ -64,6 +64,23 @@ export default defineConfig(({ command, mode }) => {
       port: 5173,
       // 不自动打开浏览器，启动后手动访问终端提示的地址
       open: false
+    },
+
+    build: {
+      // 拆包策略：把体积大且更新频率低的第三方库单独成 chunk，
+      // 避免它们与业务代码混在一个文件里导致「改一行业务代码就让用户重下 1MB」。
+      // 说明：Element Plus 采用全量注册（见上方插件区注释），其 chunk 本身就在 1MB 量级，
+      //      属既定选型而非配置问题，故把告警阈值调整到与之匹配，避免无意义的告警噪音。
+      chunkSizeWarningLimit: 1100,
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'vendor-vue': ['vue', 'vue-router', 'pinia', 'pinia-plugin-persistedstate'],
+            'vendor-element-plus': ['element-plus', '@element-plus/icons-vue'],
+            'vendor-echarts': ['echarts/core', 'echarts/charts', 'echarts/components', 'echarts/renderers']
+          }
+        }
+      }
     }
   }
 })

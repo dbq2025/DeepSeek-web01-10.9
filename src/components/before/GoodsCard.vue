@@ -93,7 +93,9 @@ function onAddCart() {
   border-radius: 8px;
   background: var(--el-bg-color);
   cursor: pointer;
-  transition: box-shadow 0.2s, transform 0.2s;
+  transition:
+    box-shadow 0.2s,
+    transform 0.2s;
 
   &:hover {
     box-shadow: 0 6px 18px rgb(0 0 0 / 10%);

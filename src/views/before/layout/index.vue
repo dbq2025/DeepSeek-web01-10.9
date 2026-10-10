@@ -13,12 +13,7 @@
         </router-link>
 
         <div class="site__search">
-          <el-input
-            v-model="keyword"
-            placeholder="搜索商品名称"
-            clearable
-            @keyup.enter="onSearch"
-          >
+          <el-input v-model="keyword" placeholder="搜索商品名称" clearable @keyup.enter="onSearch">
             <template #append>
               <el-button :icon="Search" @click="onSearch" />
             </template>
@@ -66,9 +61,7 @@
 
     <footer class="site__footer">
       <p class="site__footer-title">电子商务平台 · 前端开发技术课程设计</p>
-      <p class="site__footer-tip">
-        本系统为教学演示项目，数据由前端 Mock 生成，不涉及真实交易
-      </p>
+      <p class="site__footer-tip">本系统为教学演示项目，数据由前端 Mock 生成，不涉及真实交易</p>
     </footer>
   </div>
 </template>
@@ -185,6 +178,9 @@ onMounted(async () => {
     font-size: 14px;
 
     a {
+      // 窄屏空间紧张时必须禁止换行，否则「购物车」会被压成竖排
+      flex: none;
+      white-space: nowrap;
       color: var(--el-text-color-regular);
       text-decoration: none;
       transition: color 0.2s;
@@ -245,8 +241,12 @@ onMounted(async () => {
   }
 }
 
-// 窄屏：收紧间距并隐藏次要导航（P5 统一做响应式，这里先保证可用）
+// 平板：收紧间距并隐藏次要导航
 @include respond-below('md') {
+  .site__inner {
+    gap: 16px;
+  }
+
   .site__nav {
     gap: 14px;
   }
@@ -257,9 +257,43 @@ onMounted(async () => {
   }
 }
 
+// 手机（≤767px）：顶栏改为两行 —— 首行「Logo + 购物车 + 用户」，次行整宽搜索框。
+// 单行排布在 375px 下必然溢出（Logo 140 + 搜索框 + 导航 220 远超 335 可用宽度）。
 @include respond-below('sm') {
+  .site__header {
+    height: auto;
+  }
+
+  .site__inner {
+    flex-wrap: wrap;
+    gap: 10px 12px;
+    height: auto;
+    padding: 10px 12px;
+  }
+
+  .site__logo {
+    font-size: 16px;
+  }
+
+  // 搜索框独占第二行（order 让其排到导航之后）
   .site__search {
+    order: 3;
+    flex: 1 1 100%;
+    max-width: none;
+    min-width: 0;
+  }
+
+  .site__nav {
+    margin-left: auto;
+  }
+
+  // Logo 已指向 /home，首页入口在手机端属冗余，隐藏以腾出空间
+  .site__nav a:nth-child(1) {
     display: none;
+  }
+
+  .site__user-name {
+    max-width: 56px;
   }
 }
 </style>

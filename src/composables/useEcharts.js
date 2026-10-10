@@ -5,16 +5,33 @@
  *   const chartRef = ref(null)
  *   const { setOption } = useEcharts(chartRef)
  *   onMounted(() => setOption({ ... }))
+ *
+ * 体积优化：ECharts 采用**按需引入**（echarts/core + 具体图表/组件/渲染器），
+ *          只打包柱状图、折线图、饼图与必要组件，产物比全量 `import * as echarts from 'echarts'` 小很多。
+ *          若后续新增图表类型（如雷达图、地图），必须在此处补 use()，否则运行时图表不渲染。
  */
 import { onMounted, onBeforeUnmount } from 'vue'
-import * as echarts from 'echarts'
+import * as echarts from 'echarts/core'
+import { BarChart, LineChart, PieChart } from 'echarts/charts'
+import { GridComponent, LegendComponent, TooltipComponent } from 'echarts/components'
+import { CanvasRenderer } from 'echarts/renderers'
+
+echarts.use([
+  BarChart,
+  LineChart,
+  PieChart,
+  GridComponent,
+  LegendComponent,
+  TooltipComponent,
+  CanvasRenderer
+])
 
 /**
  * @param {import('vue').Ref<HTMLElement|null>} elRef 图表容器 ref
  * @returns {object} 图表操作方法
  */
 export function useEcharts(elRef) {
-  /** @type {import('echarts').ECharts|null} */
+  /** @type {object|null} */
   let chart = null
 
   /** 初始化实例（重复调用会复用已有实例） */

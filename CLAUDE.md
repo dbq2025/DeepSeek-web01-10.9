@@ -5,7 +5,7 @@
 >
 > 项目：电子商务平台前端系统（后台管理端 + 电商前台端）
 > 技术栈：Vite + Vue 3（组合式 API + `<script setup>`）+ JavaScript + Element Plus + Vue Router 4 + Pinia + Axios + ECharts + 自研 Vite Mock 中间件
-> 版本：v1.0　更新：2026-10-09
+> 版本：v1.4　更新：2026-10-10
 
 ---
 
@@ -328,6 +328,38 @@ meta: { title: '管理员登录', guestOnly: true, guestRedirect: '/admin/dashbo
 
 ---
 
+## 11. 代码检查与格式化规范（ESLint + Prettier）
+
+**工具链**：ESLint 9（flat config，`eslint.config.js`）+ Prettier 3（`.prettierrc`），二者用 `eslint-config-prettier` 关闭冲突规则。
+
+```bash
+npm run lint          # eslint .          —— 提交前必须零告警
+npm run lint:fix      # eslint . --fix
+npm run format        # prettier 写入
+npm run format:check  # prettier 校验（CI / 自检用）
+```
+
+**格式化基线**（`.prettierrc`，与既有代码保持一致，不要在编辑器里改成默认值）：
+
+| 项 | 值 | 说明 |
+| --- | --- | --- |
+| `semi` | `false` | 不写行尾分号 |
+| `singleQuote` | `true` | 字符串用单引号 |
+| `printWidth` | `100` | 超过 100 列换行 |
+| `trailingComma` | `none` | 不用尾随逗号 |
+| `arrowParens` | `always` | 单参数箭头函数也带括号 |
+| `endOfLine` | `lf` | **统一 LF**，避免 Windows CRLF 造成整文件 diff |
+
+**lint 规则的取舍（重要，改之前先读这里）**：
+
+1. `vue/multi-word-component-names` 关闭 —— 项目页面统一放在 `views/<模块>/index.vue`，文件名即模块名（`cart`、`search`），强制多词会破坏目录约定。
+2. `no-unused-vars` 开启 `ignoreRestSiblings` —— 允许 `const { password, ...rest } = user` 这种「解构排除敏感字段」的写法。
+3. `vue/require-v-for-key` 设为 `error` —— 对应第 10 章第 11 条，禁止用 `index` 当 `key`。
+4. `build/**/*.js`、`vite.config.js` 关闭 `no-console` —— 构建脚本允许打日志。
+5. **定向豁免必须写明原因**：仅允许在确实必要处用 `<!-- eslint-disable xxx -->` 且紧跟一行注释解释。现有唯一一例是 `components/common/SearchForm.vue` 的 `vue/no-mutating-props`——该组件刻意让筛选表单直接绑定父级 `reactive` 查询对象（而非逐字段 emit），被修改的是父级对象属性，不是 prop 本身。
+
+---
+
 ## 附录 A：新增一个标准 CRUD 模块的步骤（以「商品类型管理」为例）
 
 1. `api/admin/category.js`：按统一契约定义 `getCategoryList` / `createCategory` / `updateCategory` / `deleteCategory`（写 JSDoc）；
@@ -451,3 +483,4 @@ meta: { title: '管理员登录', guestOnly: true, guestRedirect: '/admin/dashbo
 | v1.1 | 2026-10-09 | Mock 方案由 `vite-plugin-mock` 改为自研中间件，附录 C 重写 | — |
 | v1.2 | 2026-10-09 | 新增附录 D（通用组件契约）；第 7 章补充 SCSS 全局注入与 Element Plus 引入方式 | — |
 | v1.3 | 2026-10-10 | 第 6.2/6.3 节补齐路由 meta 字段表与守卫执行顺序；新增附录 E（前后台业务组件清单） | — |
+| v1.4 | 2026-10-10 | 新增第 11 章（ESLint + Prettier 约定与规则取舍） | — |

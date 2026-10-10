@@ -12,7 +12,8 @@
     </EmptyState>
 
     <template v-else>
-      <el-table :data="cartStore.items" border stripe>
+      <!-- 桌面：表格 -->
+      <el-table v-if="!isMobile" :data="cartStore.items" border stripe>
         <el-table-column width="56" align="center">
           <template #header>
             <el-checkbox
@@ -66,6 +67,40 @@
         </el-table-column>
       </el-table>
 
+      <!-- 窄屏：卡片（表格在 375px 下会把单价/数量/操作列挤出视口） -->
+      <ul v-else class="cart__cards">
+        <li v-for="row in cartStore.items" :key="row.goodsId" class="cart-card">
+          <el-checkbox
+            class="cart-card__check"
+            :model-value="row.checked"
+            @change="(val) => cartStore.toggleChecked(row.goodsId, val)"
+          />
+          <img
+            class="cart-card__img"
+            :src="row.cover"
+            :alt="row.goodsName"
+            @click="router.push(`/goods/${row.goodsId}`)"
+          />
+          <div class="cart-card__info">
+            <p class="cart-card__name" @click="router.push(`/goods/${row.goodsId}`)">
+              {{ row.goodsName }}
+            </p>
+            <p class="cart-card__price">{{ formatMoney(row.price) }}</p>
+            <div class="cart-card__ops">
+              <el-input-number
+                :model-value="row.count"
+                :min="1"
+                :max="99"
+                size="small"
+                @change="(val) => cartStore.updateCount(row.goodsId, val)"
+              />
+              <el-button link type="danger" @click="onRemove(row)">删除</el-button>
+            </div>
+          </div>
+          <span class="cart-card__subtotal">{{ formatMoney(row.price * row.count) }}</span>
+        </li>
+      </ul>
+
       <div class="cart__bar">
         <el-checkbox
           :model-value="cartStore.allChecked"
@@ -83,7 +118,9 @@
         </el-button>
 
         <div class="cart__bar-right">
-          <span>已选 <b>{{ cartStore.checkedItems.length }}</b> 种商品</span>
+          <span
+            >已选 <b>{{ cartStore.checkedItems.length }}</b> 种商品</span
+          >
           <span class="cart__total">
             合计：<b>{{ formatMoney(cartStore.totalPrice) }}</b>
           </span>
@@ -105,6 +142,7 @@
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import EmptyState from '@/components/common/EmptyState.vue'
+import { MOBILE_QUERY, useMediaQuery } from '@/composables/useMediaQuery'
 import { useCartStore } from '@/store/modules/cart'
 import { useUserStore } from '@/store/modules/user'
 import { formatMoney } from '@/utils/format'
@@ -112,6 +150,9 @@ import { formatMoney } from '@/utils/format'
 const router = useRouter()
 const cartStore = useCartStore()
 const userStore = useUserStore()
+
+/** 窄屏切换为卡片布局 */
+const isMobile = useMediaQuery(MOBILE_QUERY)
 
 /**
  * 删除单个商品（二次确认）
@@ -236,10 +277,82 @@ function onCheckout() {
     flex-wrap: wrap;
   }
 
+  // 「已选 N 种商品」在窄屏会被压成两行（「已选 2 种商」/「品」），禁止折行
+  .cart__bar-right > span {
+    white-space: nowrap;
+  }
+
   .cart__bar-right {
     width: 100%;
     margin-left: 0;
     justify-content: space-between;
+  }
+}
+
+// 窄屏卡片式购物车
+.cart__cards {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cart-card {
+  @include card-surface;
+
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+
+  &__check {
+    margin-top: 4px;
+    flex: none;
+  }
+
+  &__img {
+    width: 72px;
+    height: 72px;
+    flex: none;
+    border-radius: 6px;
+    object-fit: cover;
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__name {
+    @include ellipsis-multi(2);
+
+    margin: 0 0 6px;
+    color: var(--el-text-color-primary);
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  &__price {
+    margin: 0 0 8px;
+    color: $color-price;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  &__ops {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  &__subtotal {
+    flex: none;
+    color: $color-price;
+    font-size: 14px;
+    font-weight: 600;
   }
 }
 </style>

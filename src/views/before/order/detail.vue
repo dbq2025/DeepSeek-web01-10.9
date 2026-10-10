@@ -12,26 +12,17 @@
       <section class="order-detail__panel order-detail__status">
         <template v-if="order.status === ORDER_STATUS.CANCELED">
           <el-alert type="info" :closable="false" show-icon>
-            <template #title>
-              该订单已取消，下单时占用的库存与销量已回滚
-            </template>
+            <template #title> 该订单已取消，下单时占用的库存与销量已回滚 </template>
           </el-alert>
         </template>
         <template v-else>
           <div class="order-detail__status-head">
             <span class="order-detail__status-text">{{ formatOrderStatus(order.status) }}</span>
             <div class="order-detail__status-actions">
-              <el-button
-                v-if="order.status === ORDER_STATUS.UNPAID"
-                type="primary"
-                @click="onPay"
-              >
+              <el-button v-if="order.status === ORDER_STATUS.UNPAID" type="primary" @click="onPay">
                 去付款
               </el-button>
-              <el-button
-                v-if="order.status === ORDER_STATUS.UNPAID"
-                @click="onCancel"
-              >
+              <el-button v-if="order.status === ORDER_STATUS.UNPAID" @click="onCancel">
                 取消订单
               </el-button>
             </div>
@@ -48,7 +39,7 @@
       <!-- 订单信息 -->
       <section class="order-detail__panel">
         <h3 class="order-detail__subtitle">订单信息</h3>
-        <el-descriptions :column="2" border>
+        <el-descriptions :column="isMobile ? 1 : 2" border>
           <el-descriptions-item label="订单编号">{{ order.orderNo }}</el-descriptions-item>
           <el-descriptions-item label="订单状态">
             <StatusTag kind="order" :status="order.status" />
@@ -61,25 +52,7 @@
       <!-- 商品明细 -->
       <section class="order-detail__panel">
         <h3 class="order-detail__subtitle">商品明细</h3>
-        <el-table :data="order.items" border>
-          <el-table-column label="商品信息" min-width="320">
-            <template #default="{ row }">
-              <div class="order-detail__goods" @click="router.push(`/goods/${row.goodsId}`)">
-                <img class="order-detail__goods-img" :src="row.cover" :alt="row.goodsName" />
-                <span class="order-detail__goods-name">{{ row.goodsName }}</span>
-              </div>
-            </template>
-          </el-table-column>
-          <el-table-column label="单价" width="150">
-            <template #default="{ row }">{{ formatMoney(row.price) }}</template>
-          </el-table-column>
-          <el-table-column prop="count" label="数量" width="100" align="center" />
-          <el-table-column label="小计" width="160">
-            <template #default="{ row }">
-              <span class="order-detail__subtotal">{{ formatMoney(row.price * row.count) }}</span>
-            </template>
-          </el-table-column>
-        </el-table>
+        <OrderGoodsList :items="order.items" />
 
         <div class="order-detail__total">
           <span>共 {{ totalCount }} 件商品</span>
@@ -92,9 +65,15 @@
       <section class="order-detail__panel">
         <h3 class="order-detail__subtitle">收货信息</h3>
         <el-descriptions :column="1" border>
-          <el-descriptions-item label="收货人">{{ order.address?.name || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="联系电话">{{ order.address?.phone || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="收货地址">{{ order.address?.detail || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="收货人">{{
+            order.address?.name || '-'
+          }}</el-descriptions-item>
+          <el-descriptions-item label="联系电话">{{
+            order.address?.phone || '-'
+          }}</el-descriptions-item>
+          <el-descriptions-item label="收货地址">{{
+            order.address?.detail || '-'
+          }}</el-descriptions-item>
         </el-descriptions>
       </section>
     </template>
@@ -111,6 +90,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import StatusTag from '@/components/common/StatusTag.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
+import OrderGoodsList from '@/components/before/OrderGoodsList.vue'
+import { MOBILE_QUERY, useMediaQuery } from '@/composables/useMediaQuery'
 import { cancelOrderApi, getOrderDetailApi, payOrderApi } from '@/api/before/order'
 import { ORDER_STATUS } from '@/utils/constants'
 import { formatMoney, formatOrderStatus } from '@/utils/format'
@@ -118,13 +99,14 @@ import { formatMoney, formatOrderStatus } from '@/utils/format'
 const route = useRoute()
 const router = useRouter()
 
+/** 窄屏描述列表切换为单列 */
+const isMobile = useMediaQuery(MOBILE_QUERY)
+
 const loading = ref(true)
 const order = ref(null)
 
 /** 商品总件数 */
-const totalCount = computed(() =>
-  (order.value?.items || []).reduce((sum, it) => sum + it.count, 0)
-)
+const totalCount = computed(() => (order.value?.items || []).reduce((sum, it) => sum + it.count, 0))
 
 /** 加载订单详情 */
 async function loadDetail() {
@@ -218,34 +200,6 @@ onMounted(loadDetail)
     color: $color-price;
     font-size: 20px;
     font-weight: 700;
-  }
-
-  &__goods {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    cursor: pointer;
-  }
-
-  &__goods-img {
-    width: 56px;
-    height: 56px;
-    flex: none;
-    border-radius: 6px;
-    object-fit: cover;
-  }
-
-  &__goods-name {
-    color: var(--el-text-color-primary);
-
-    &:hover {
-      color: $color-primary;
-    }
-  }
-
-  &__subtotal {
-    color: $color-price;
-    font-weight: 600;
   }
 
   &__total {

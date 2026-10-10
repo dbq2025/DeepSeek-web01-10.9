@@ -3,7 +3,15 @@
  * 对应 api/before/auth.js
  */
 import { getDb } from '../db.js'
-import { ok, fail, buildToken, currentUser, publicUser, nextId, formatDateTime } from '../helpers.js'
+import {
+  ok,
+  fail,
+  buildToken,
+  currentUser,
+  publicUser,
+  nextId,
+  formatDateTime
+} from '../helpers.js'
 
 export default [
   {

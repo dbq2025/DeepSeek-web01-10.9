@@ -7,7 +7,11 @@
 <template>
   <header class="header">
     <div class="header__left">
-      <el-icon class="header__toggle" :title="collapsed ? '展开菜单' : '收起菜单'" @click="appStore.toggleSidebar()">
+      <el-icon
+        class="header__toggle"
+        :title="collapsed ? '展开菜单' : '收起菜单'"
+        @click="appStore.toggleSidebar()"
+      >
         <Expand v-if="collapsed" />
         <Fold v-else />
       </el-icon>

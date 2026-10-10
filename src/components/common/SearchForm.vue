@@ -2,7 +2,9 @@
   通用搜索栏
   职责：由 fields 配置驱动渲染筛选项，统一「查询 / 重置」按钮与右侧扩展插槽
   说明：筛选值直接写入父组件传入的响应式查询对象（父组件用 useTable 的 reactive query 承载），
-       避免为每个字段单独 emit 一次，减少样板代码
+       避免为每个字段单独 emit 一次，减少样板代码。
+       因此这里对 vue/no-mutating-props 做定向豁免：被修改的是父级 reactive 对象的属性，
+       而非 prop 本身，运行时不会出现「子组件改 prop」的问题。
   用法：
     <SearchForm :model-value="query" :fields="searchFields" :loading="loading"
       @search="search" @reset="reset">
@@ -10,6 +12,7 @@
     </SearchForm>
 -->
 <template>
+  <!-- eslint-disable vue/no-mutating-props -->
   <el-form class="search-form" :model="modelValue" :inline="true" @submit.prevent>
     <el-form-item v-for="field in fields" :key="field.prop" :label="field.label">
       <el-select

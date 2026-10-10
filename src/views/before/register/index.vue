@@ -61,9 +61,7 @@
     </el-form>
 
     <template #foot>
-      <p class="register__foot-row">
-        已有账号？<router-link to="/login">返回登录</router-link>
-      </p>
+      <p class="register__foot-row">已有账号？<router-link to="/login">返回登录</router-link></p>
     </template>
   </AuthShell>
 </template>

@@ -22,7 +22,8 @@
     <section class="demo__section">
       <h3 class="demo__subheading">1. SearchForm + DataTable + Pagination</h3>
       <p class="demo__hint">
-        搜索栏由 fields 配置驱动；表格由 columns 配置驱动，其中「商品名称」「操作」两列使用了动态插槽自定义。
+        搜索栏由 fields 配置驱动；表格由 columns
+        配置驱动，其中「商品名称」「操作」两列使用了动态插槽自定义。
       </p>
 
       <SearchForm
@@ -62,7 +63,9 @@
     <!-- ── 2. 状态标签 ──────────────────────────────────── -->
     <section class="demo__section">
       <h3 class="demo__subheading">2. StatusTag</h3>
-      <p class="demo__hint">同一组件通过 kind 区分订单状态与商品上下架状态，内部复用 utils/format 的映射表。</p>
+      <p class="demo__hint">
+        同一组件通过 kind 区分订单状态与商品上下架状态，内部复用 utils/format 的映射表。
+      </p>
       <div class="demo__row">
         <span class="demo__row-label">订单状态</span>
         <StatusTag v-for="status in orderStatusList" :key="status" kind="order" :status="status" />
@@ -77,7 +80,9 @@
     <!-- ── 3. 空状态 ────────────────────────────────────── -->
     <section class="demo__section">
       <h3 class="demo__subheading">3. EmptyState</h3>
-      <p class="demo__hint">统一空状态文案与操作区，可直接放进卡片或弹窗（min-height 控制容器高度）。</p>
+      <p class="demo__hint">
+        统一空状态文案与操作区，可直接放进卡片或弹窗（min-height 控制容器高度）。
+      </p>
       <div class="demo__empty-box">
         <EmptyState description="暂无收藏商品" min-height="180px">
           <el-button type="primary" @click="goHome">去逛逛</el-button>
@@ -89,11 +94,14 @@
     <section class="demo__section">
       <h3 class="demo__subheading">4. FormDialog + ImageUpload</h3>
       <p class="demo__hint">
-        点击按钮打开弹窗；表单校验不通过时不会触发保存。图片选择后经 Mock 上传接口回写地址（Base64 直传）。
+        点击按钮打开弹窗；表单校验不通过时不会触发保存。图片选择后经 Mock 上传接口回写地址（Base64
+        直传）。
       </p>
       <el-space>
         <el-button type="primary" @click="formDialogRef?.open()">新增商品</el-button>
-        <el-button :disabled="list.length === 0" @click="formDialogRef?.open(list[0])">编辑第一行</el-button>
+        <el-button :disabled="list.length === 0" @click="formDialogRef?.open(list[0])"
+          >编辑第一行</el-button
+        >
       </el-space>
     </section>
 

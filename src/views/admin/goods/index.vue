@@ -32,9 +32,13 @@
         :loading="loading"
         show-selection
         row-key="id"
-        empty-text="没有符合条件的商品"
         @selection-change="onSelectionChange"
       >
+        <template #empty>
+          <EmptyState v-if="error" type="error" @retry="load" />
+          <EmptyState v-else description="没有符合条件的商品" />
+        </template>
+
         <template #col-name="{ row }">
           <div class="goods__name">{{ row.name }}</div>
           <div class="goods__desc">{{ row.description }}</div>
@@ -66,6 +70,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import SearchForm from '@/components/common/SearchForm.vue'
 import DataTable from '@/components/common/DataTable.vue'
 import Pagination from '@/components/common/Pagination.vue'
+import EmptyState from '@/components/common/EmptyState.vue'
 import { useTable } from '@/composables/useTable'
 import { useCategoryStore } from '@/store/modules/category'
 import { useGoodsStore } from '@/store/modules/goods'
@@ -82,10 +87,12 @@ const categoryStore = useCategoryStore()
 const goodsStore = useGoodsStore()
 
 // immediate: false —— 筛选条件需要先从 store 恢复，再发起首次请求
-const { loading, list, total, query, load, search, reset, changePage, changeSize } = useTable(
-  getGoodsListApi,
-  { defaultQuery: { name: '', categoryId: '', status: '' }, pageSize: 10, immediate: false }
-)
+const { loading, error, list, total, query, load, search, reset, changePage, changeSize } =
+  useTable(getGoodsListApi, {
+    defaultQuery: { name: '', categoryId: '', status: '' },
+    pageSize: 10,
+    immediate: false
+  })
 
 /** 当前勾选的行 */
 const selected = ref([])
@@ -168,7 +175,7 @@ async function onToggleStatus(target) {
     await updateGoodsStatusApi({ id: target.id, status: next })
     ElMessage.success(`${statusActionText(target)}成功`)
     await load()
-  } catch (error) {
+  } catch {
     // 失败提示已由 request.js 统一处理
   }
 }
@@ -184,11 +191,15 @@ async function onBatchStatus(status) {
   const action = status === GOODS_STATUS.ON ? '上架' : '下架'
 
   try {
-    await ElMessageBox.confirm(`确定将选中的 ${ids.length} 件商品批量${action}吗？`, '批量操作确认', {
-      type: 'warning',
-      confirmButtonText: `确定${action}`,
-      cancelButtonText: '取消'
-    })
+    await ElMessageBox.confirm(
+      `确定将选中的 ${ids.length} 件商品批量${action}吗？`,
+      '批量操作确认',
+      {
+        type: 'warning',
+        confirmButtonText: `确定${action}`,
+        cancelButtonText: '取消'
+      }
+    )
   } catch {
     return // 用户取消
   }
@@ -197,7 +208,7 @@ async function onBatchStatus(status) {
     const data = await batchUpdateGoodsStatusApi({ ids, status })
     ElMessage.success(`已${action} ${data.count} 件商品`)
     await load()
-  } catch (error) {
+  } catch {
     // 失败提示已由 request.js 统一处理
   }
 }
@@ -222,7 +233,7 @@ async function onDelete(target) {
     await deleteGoodsApi(target.id)
     ElMessage.success('删除成功')
     await load()
-  } catch (error) {
+  } catch {
     // 失败提示已由 request.js 统一处理
   }
 }

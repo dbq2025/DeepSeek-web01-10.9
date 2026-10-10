@@ -14,12 +14,12 @@
     />
 
     <section class="order__panel">
-      <DataTable
-        :columns="columns"
-        :data="list"
-        :loading="loading"
-        empty-text="没有符合条件的订单"
-      >
+      <DataTable :columns="columns" :data="list" :loading="loading">
+        <template #empty>
+          <EmptyState v-if="error" type="error" @retry="load" />
+          <EmptyState v-else description="没有符合条件的订单" />
+        </template>
+
         <template #col-orderNo="{ row }">
           <span class="order__no">{{ row.orderNo }}</span>
         </template>
@@ -72,16 +72,15 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import SearchForm from '@/components/common/SearchForm.vue'
 import DataTable from '@/components/common/DataTable.vue'
 import Pagination from '@/components/common/Pagination.vue'
+import EmptyState from '@/components/common/EmptyState.vue'
 import { useTable } from '@/composables/useTable'
 import { getOrderListApi, updateOrderStatusApi } from '@/api/admin/order'
 import { ORDER_STATUS, ORDER_STATUS_TEXT } from '@/utils/constants'
 
 const router = useRouter()
 
-const { loading, list, total, query, load, search, reset, changePage, changeSize } = useTable(
-  getOrderListApi,
-  { defaultQuery: { orderNo: '', status: '' }, pageSize: 10 }
-)
+const { loading, error, list, total, query, load, search, reset, changePage, changeSize } =
+  useTable(getOrderListApi, { defaultQuery: { orderNo: '', status: '' }, pageSize: 10 })
 
 /** 状态下拉选项（由常量映射表生成，避免重复维护） */
 const ORDER_STATUS_OPTIONS = Object.keys(ORDER_STATUS_TEXT).map((key) => ({
@@ -143,7 +142,7 @@ async function onChangeStatus(target, status) {
     await updateOrderStatusApi({ id: target.id, status })
     ElMessage.success(`已标记为${text}`)
     await load()
-  } catch (error) {
+  } catch {
     // 失败提示已由 request.js 统一处理
   }
 }

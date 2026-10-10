@@ -51,12 +51,7 @@
             >
               加入购物车
             </el-button>
-            <el-button
-              type="danger"
-              size="large"
-              :disabled="goods.stock <= 0"
-              @click="onBuyNow"
-            >
+            <el-button type="danger" size="large" :disabled="goods.stock <= 0" @click="onBuyNow">
               立即购买
             </el-button>
             <el-button

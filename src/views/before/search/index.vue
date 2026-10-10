@@ -34,7 +34,8 @@
 
     <p class="search__summary">
       <template v-if="query.name">
-        关键字「<b>{{ query.name }}</b>」共找到 <b>{{ total }}</b> 件商品
+        关键字「<b>{{ query.name }}</b
+        >」共找到 <b>{{ total }}</b> 件商品
       </template>
       <template v-else>
         共 <b>{{ total }}</b> 件在售商品
@@ -47,6 +48,7 @@
     <div v-else-if="list.length" class="search__grid">
       <GoodsCard v-for="item in list" :key="item.id" :goods="item" />
     </div>
+    <EmptyState v-else-if="error" type="error" @retry="load" />
     <EmptyState v-else description="没有找到符合条件的商品">
       <el-button type="primary" @click="onResetFilter">清空筛选条件</el-button>
     </EmptyState>
@@ -77,7 +79,7 @@ import { GOODS_STATUS } from '@/utils/constants'
 const route = useRoute()
 const categoryStore = useCategoryStore()
 
-const { loading, list, total, query, load, search, changePage, changeSize } = useTable(
+const { loading, error, list, total, query, load, search, changePage, changeSize } = useTable(
   getFrontGoodsListApi,
   {
     // 前台只展示上架商品；immediate 关闭，改为「先同步路由参数再请求」
