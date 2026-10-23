@@ -88,6 +88,7 @@ import DataTable from '@/components/common/DataTable.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import PageHeader from '@/components/common/PageHeader.vue'
+import { GOODS_COLUMNS, buildGoodsSearchFields } from './columns.js'
 import { useTable } from '@/composables/useTable'
 import { useCategoryStore } from '@/store/modules/category'
 import { useGoodsStore } from '@/store/modules/goods'
@@ -115,34 +116,10 @@ const { loading, error, list, total, query, load, search, reset, changePage, cha
 const selected = ref([])
 const selectedIds = computed(() => selected.value.map((item) => item.id))
 
-/** 搜索栏字段配置 */
-const searchFields = computed(() => [
-  { prop: 'name', label: '商品名称' },
-  { prop: 'categoryId', label: '商品类型', type: 'select', options: categoryStore.options },
-  {
-    prop: 'status',
-    label: '上架状态',
-    type: 'select',
-    options: [
-      { label: '已上架', value: GOODS_STATUS.ON },
-      { label: '已下架', value: GOODS_STATUS.OFF }
-    ]
-  }
-])
+/** 搜索栏字段配置（类型选项来自 categoryStore） */
+const searchFields = computed(() => buildGoodsSearchFields(categoryStore.options))
 
-// 列宽按「1280 视口下 968px 可用宽度」预算（含 48px 多选列，总和 ≈ 940px）：
-// 保证 1280 宽不出现横向滚动条，1440 宽时富余空间自动分给「商品」列
-const columns = [
-  { prop: 'cover', label: '图片', type: 'image', width: 64, align: 'center' },
-  { prop: 'name', label: '商品', minWidth: 160 },
-  { prop: 'categoryName', label: '类型', width: 88 },
-  { prop: 'price', label: '价格', type: 'money', width: 96, align: 'right' },
-  { prop: 'stock', label: '库存', width: 64, align: 'right' },
-  { prop: 'sales', label: '销量', width: 64, align: 'right' },
-  { prop: 'status', label: '状态', type: 'tag', tagKind: 'goods', width: 84, align: 'center' },
-  { prop: 'createTime', label: '创建时间', type: 'date', width: 136 },
-  { label: '操作', type: 'action', width: 140, align: 'center', fixed: 'right' }
-]
+const columns = GOODS_COLUMNS
 
 /**
  * 勾选变化

@@ -200,4 +200,17 @@ const isUnpaid = computed(() => props.order.status === ORDER_STATUS.UNPAID)
     text-align: left;
   }
 }
+
+// 手机：卡头允许换行，订单号整体不折断（否则会断成「NO2026…」+ 尾号两行）
+@include respond-below('sm') {
+  .order-card__head {
+    flex-wrap: wrap;
+    gap: $space-2;
+    padding: $space-3 $space-4;
+  }
+
+  .order-card__no {
+    white-space: nowrap;
+  }
+}
 </style>

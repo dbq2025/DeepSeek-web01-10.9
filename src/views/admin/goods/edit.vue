@@ -117,21 +117,13 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
 import ImageUpload from '@/components/common/ImageUpload.vue'
 import PageHeader from '@/components/common/PageHeader.vue'
 import { useCategoryStore } from '@/store/modules/category'
-import {
-  createGoodsApi,
-  getGoodsDetailApi,
-  updateGoodsApi,
-  uploadGoodsImageApi
-} from '@/api/admin/goods'
+import { useGoodsForm } from '@/composables/useGoodsForm'
 import { GOODS_STATUS } from '@/utils/constants'
-import { nonNegativeInteger, positiveNumber, required, requiredSelect } from '@/utils/validate'
-import { readFileAsDataURL } from '@/utils/file'
 
 const props = defineProps({
   /** 路由参数 id：编辑态有值，新增态为空 @type {string|number} */
@@ -142,91 +134,18 @@ const router = useRouter()
 const categoryStore = useCategoryStore()
 
 const formRef = ref(null)
-const loading = ref(false)
-const saving = ref(false)
-const isEdit = computed(() => !!props.id)
-
-const form = reactive({
-  name: '',
-  categoryId: '',
-  price: 0,
-  stock: 0,
-  status: GOODS_STATUS.ON,
-  cover: '',
-  description: ''
-})
-
-const rules = {
-  name: [required('商品名称')],
-  categoryId: [requiredSelect('商品类型')],
-  price: [positiveNumber('价格')],
-  stock: [nonNegativeInteger('库存')]
-}
 
 /** 返回列表页（筛选条件保存在 goodsStore，无需在此传参） */
 function goBack() {
   router.push('/admin/goods')
 }
 
-/** 编辑态：加载商品详情回填表单 */
-async function loadDetail() {
-  if (!isEdit.value) return
-  loading.value = true
-  try {
-    const detail = await getGoodsDetailApi(props.id)
-    Object.assign(form, {
-      name: detail.name,
-      categoryId: detail.categoryId,
-      price: detail.price,
-      stock: detail.stock,
-      status: detail.status,
-      cover: detail.cover,
-      description: detail.description
-    })
-  } catch (error) {
-    // 失败提示已由 request.js 统一处理
-  } finally {
-    loading.value = false
-  }
-}
-
-/** 提交保存：新增 / 编辑共用 */
-async function onSubmit() {
-  if (!formRef.value || saving.value) return
-  try {
-    await formRef.value.validate()
-  } catch {
-    return
-  }
-
-  saving.value = true
-  try {
-    if (isEdit.value) {
-      await updateGoodsApi({ ...form, id: Number(props.id) })
-      ElMessage.success('保存成功')
-    } else {
-      await createGoodsApi({ ...form })
-      ElMessage.success('新增成功')
-    }
-    goBack()
-  } catch (error) {
-    // 失败提示已由 request.js 统一处理
-  } finally {
-    saving.value = false
-  }
-}
-
-/**
- * 图片上传（以 uploadFn 注入给 ImageUpload）
- * 说明：纯前端项目先把本地文件转 Base64，再交给 Mock 上传接口回传地址
- * @param {File} file 本地图片
- * @returns {Promise<string>} 图片地址
- */
-async function uploadCover(file) {
-  const base64 = await readFileAsDataURL(file)
-  const data = await uploadGoodsImageApi(base64)
-  return data.url
-}
+// 表单状态 / 校验 / 回填 / 提交 / 上传全部收敛在组合函数里，页面只做编排
+const { loading, saving, isEdit, form, rules, loadDetail, onSubmit, uploadCover } = useGoodsForm(
+  props,
+  formRef,
+  goBack
+)
 
 onMounted(() => {
   categoryStore.fetchAll()

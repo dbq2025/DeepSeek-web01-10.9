@@ -30,6 +30,9 @@
 
 ## 二、快速开始
 
+> 📁 本项目的工程根目录为 `Code/`，以下命令均需先进入该目录执行：
+> `cd Code`（若已位于 `D:\WorkBuddy\前端02`）。
+
 ```bash
 # 1. 安装依赖（请使用 npm）
 npm install
@@ -115,14 +118,72 @@ npm run format        # Prettier 格式化
 <img src="./docs/screenshots/24-mobile-cart.png" width="240" alt="窄屏购物车" />
 <img src="./docs/screenshots/25-mobile-order-list.png" width="240" alt="窄屏我的订单" />
 
-> 全部 26 张截图见 [`docs/screenshots/`](./docs/screenshots/)。
+> 全部 26 张截图见 [`docs/screenshots/`](./docs/screenshots/)；v2 视觉升级后的验收截图（8 路由 × 2 视口）见
+> [`docs/screenshots/ui-v2/`](./docs/screenshots/ui-v2/)。
 
 ---
 
-## 四、目录结构
+## 四、界面设计（v2 设计系统）
+
+界面从「Element Plus 默认外观」升级为有明确令牌的设计系统。改造原则：**只改样式层、基元组件与页面模板结构，不动任何业务逻辑 / 接口 / 路由 / 状态管理**，且不新增任何依赖。
+
+### 4.1 色板
+
+| 用途 | 令牌 | 取值 |
+| --- | --- | --- |
+| 主色（墨蓝） | `--app-color-primary` | `#3355e0` |
+| 价格 / 促销红 | `--app-color-price` | `#e93b3d` |
+| 价格区浅底 | `--app-color-price-bg` | `#fff1f0` |
+| 强调色（仅角标） | `--app-color-accent` | `#f97316` |
+| 页面底色 | `--app-bg-page` | `#f6f7f9` |
+| 卡片底色 | `--app-bg-card` | `#ffffff` |
+| 次级填充 | `--app-bg-subtle` | `#f1f3f5` |
+| 导航深色 | SCSS `$nav-bg` | `#111928` |
+| 一级文字 | `--app-text-1` | `#1b1f27` |
+| 二级文字 | `--app-text-2` | `#5a6270` |
+| 辅助文字 | `--app-text-3` | `#8a919e` |
+
+### 4.2 字号（仅 6 档）
+
+| 令牌 | 值 | 典型用途 |
+| --- | --- | --- |
+| `$font-12` | 12px | 辅助信息 / 角标 / 时间 |
+| `$font-13` | 13px | 表单标签 / 描述 |
+| `$font-14` | 14px | 正文 / 表格 |
+| `$font-16` | 16px | 小标题 / 价格数字 |
+| `$font-20` | 20px | 页面标题 / KPI（长数值时） |
+| `$font-30` | 30px | KPI 主数值 |
+
+### 4.3 圆角与阴影
+
+| 令牌 | 值 | 用途 |
+| --- | --- | --- |
+| `--app-radius-control` | 8px | 按钮 / 输入框 / 标签容器 |
+| `--app-radius-card` | 12px | 卡片 |
+| `--app-radius-panel` | 16px | 大面板 / 弹窗 / 首屏轮播 |
+| `--app-radius-pill` | 999px | 胶囊（搜索框 / 分段控件 / 角标） |
+| `--app-shadow-card` | `0 1px 3px rgb(16 24 40 / 6%)…` | 卡片默认 |
+| `--app-shadow-hover` | `0 12px 32px rgb(16 24 40 / 12%)` | 卡片 hover 抬升 |
+
+### 4.4 令牌链路
 
 ```
-前端02/
+variables.scss  ──@use──▶  tokens.scss（输出 --app-*）
+      │                          │
+      │                          └──▶ utils/theme.js（ECharts 读色）
+      └──@use──▶ element-override.scss（--app-* → --el-* + 组件级规则）
+                     ▲
+                index.scss 按 tokens → motion → element-override 顺序装配
+```
+
+约束：色值只允许出现在 `variables.scss`（`mock/svg.js` 的生成参数除外）；组件内一律使用 `var(--app-*)`；`grep -rn "409EFF" src` 为 0 条。
+
+---
+
+## 五、目录结构
+
+```
+Code/                            # 工程根目录（前端代码统一存放于此）
 ├─ build/
 │  └─ mock-server-plugin.js      # 自研 Vite Mock 中间件（dev 期拦截 /api/*）
 ├─ docs/
@@ -163,7 +224,7 @@ npm run format        # Prettier 格式化
 
 ---
 
-## 五、Mock 数据说明
+## 六、Mock 数据说明
 
 项目**不连接真实后端**，所有接口由自研的 Vite 中间件在开发期拦截并返回模拟数据。
 
@@ -195,7 +256,7 @@ npm run format        # Prettier 格式化
 
 ---
 
-## 六、路由权限模型
+## 七、路由权限模型
 
 路由 `meta` 字段与守卫执行顺序（`src/router/guard.js`）：
 
@@ -215,7 +276,7 @@ guestOnly → requiresAuth → role
 
 ---
 
-## 七、代码规范
+## 八、代码规范
 
 全部约定见根目录 **[CLAUDE.md](./CLAUDE.md)**（11 章 + 附录 A~E），要点：
 
@@ -231,7 +292,7 @@ npm run format   # 统一代码格式
 
 ---
 
-## 八、已知约束
+## 九、已知约束
 
 1. **Element Plus 采用全量注册**（`app.use(ElementPlus, { locale: zhCn })` + 全局 `index.css`），
    未使用 `unplugin-vue-components` 按需解析器。原因是按需解析器会与全局样式重复注入 CSS，
@@ -242,7 +303,7 @@ npm run format   # 统一代码格式
 
 ---
 
-## 九、相关文档
+## 十、相关文档
 
 | 文档 | 内容 |
 | --- | --- |
@@ -252,7 +313,7 @@ npm run format   # 统一代码格式
 
 ---
 
-## 十、设计参考
+## 十一、设计参考
 
 架构与工程组织参考了以下开源项目：
 
@@ -263,6 +324,6 @@ npm run format   # 统一代码格式
 
 ---
 
-## 十一、许可
+## 十二、许可
 
 本项目为课程设计教学用途，仅供学习参考。
