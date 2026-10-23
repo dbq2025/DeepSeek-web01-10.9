@@ -139,7 +139,7 @@ onMounted(async () => {
     position: sticky;
     top: 0;
     z-index: 100;
-    height: $header-height;
+    height: $site-header-h;
     border-bottom: 1px solid var(--el-border-color-lighter);
     background: var(--el-bg-color);
   }

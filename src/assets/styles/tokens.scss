@@ -1,0 +1,53 @@
+/**
+ * 设计令牌 → CSS 自定义属性（--app-*）
+ * 职责：把 variables.scss 的 SCSS 值输出为运行时可读的 CSS 变量，
+ *       让组件样式与 ECharts（canvas 无法读 SCSS）共用同一套取值
+ * 注意：本文件由 index.scss 以 @use 引入，属独立编译单元，
+ *      不会获得 vite.config.js 的 additionalData 注入，必须自行 @use 变量文件
+ */
+@use 'variables' as *;
+
+:root {
+  // ---------- 主色与语义色
+  --app-color-primary: #{$color-primary};
+  --app-color-primary-dark: #{$color-primary-dark-2};
+  --app-color-price: #{$color-price};
+  --app-color-accent: #{$color-accent};
+
+  // ---------- 背景与边框
+  --app-bg-page: #{$neutral-50};
+  --app-bg-card: #{$neutral-0};
+  --app-bg-subtle: #{$neutral-100};
+  --app-bg-nav: #{$nav-bg};
+  --app-border: #{$neutral-200};
+  --app-border-strong: #{$neutral-300};
+
+  // ---------- 文字层级（正文 / 次要 / 辅助 / 占位）
+  --app-text-1: #{$neutral-900};
+  --app-text-2: #{$neutral-600};
+  --app-text-3: #{$neutral-500};
+  --app-text-4: #{$neutral-400};
+
+  // ---------- 圆角
+  --app-radius-card: #{$radius-md};
+  --app-radius-control: #{$radius-sm};
+  --app-radius-panel: #{$radius-lg};
+  --app-radius-pill: #{$radius-pill};
+
+  // ---------- 阴影
+  --app-shadow-1: #{$shadow-1};
+  --app-shadow-card: #{$shadow-2};
+  --app-shadow-3: #{$shadow-3};
+  --app-shadow-hover: #{$shadow-4};
+
+  // ---------- 动效
+  --app-ease: #{$ease-out};
+  --app-dur: #{$dur-base};
+
+  // ---------- 图表色板（供 utils/theme.js 读取，避免 JS 里硬编码色值）
+  --app-chart-1: #{nth($chart-colors, 1)};
+  --app-chart-2: #{nth($chart-colors, 2)};
+  --app-chart-3: #{nth($chart-colors, 3)};
+  --app-chart-4: #{nth($chart-colors, 4)};
+  --app-chart-5: #{nth($chart-colors, 5)};
+}

@@ -1,0 +1,64 @@
+/**
+ * 动效令牌与关键帧
+ * 职责：统一时长 / 缓动，并提供全站复用的两段动画
+ * 约束：只动 transform + opacity（避免触发布局抖动），不引入动画库
+ */
+@use 'variables' as *;
+
+:root {
+  --app-ease: #{$ease-out};
+  --app-dur-fast: #{$dur-fast};
+  --app-dur: #{$dur-base};
+  --app-dur-slow: #{$dur-slow};
+}
+
+// 页面 / 区块入场：轻微上浮 + 淡入
+@keyframes fade-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// 骨架屏扫光：用 translateX 制造光带，不改变盒子尺寸
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(100%);
+  }
+}
+
+// 路由过渡（P4-1）：加在 admin/layout 与 before/layout 的 router-view 上，
+// 不加 App.vue，避免与子 layout 形成双重过渡
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition:
+    opacity var(--app-dur) var(--app-ease),
+    transform var(--app-dur) var(--app-ease);
+}
+
+.fade-slide-enter-from {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+// 尊重系统「减少动态效果」偏好
+@media (prefers-reduced-motion: reduce) {
+  .fade-slide-enter-active,
+  .fade-slide-leave-active {
+    transition: none;
+  }
+}

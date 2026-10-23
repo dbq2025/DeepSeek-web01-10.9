@@ -63,9 +63,60 @@
 }
 
 /// 卡片容器（统一圆角 + 阴影 + 内边距）
-@mixin card-surface {
-  padding: 16px;
-  background: var(--el-bg-color);
-  border: 1px solid var(--el-border-color-lighter);
-  border-radius: 6px;
+/// 说明：1px 边框铺满全站是「Excel 感」的主要来源，故卡片改为「阴影优先」；
+///      仍保留 1px transparent 占位，避免后续想加边框时出现布局跳动
+/// @param {Length} $padding 内边距
+@mixin card-surface($padding: 20px) {
+  padding: $padding;
+  background: var(--app-bg-card);
+  border: 1px solid transparent;
+  border-radius: var(--app-radius-card);
+  box-shadow: var(--app-shadow-card);
+}
+
+/// 可交互卡片：hover 时抬升
+/// 说明：只动 transform / box-shadow，不触发回流
+@mixin hover-lift {
+  transition:
+    transform var(--app-dur) var(--app-ease),
+    box-shadow var(--app-dur) var(--app-ease);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--app-shadow-hover);
+  }
+}
+
+/// 指标数字：等宽数字 + 负字距（多卡并排时数字宽度对齐）
+/// @param {Length} $size 字号
+@mixin metric-number($size: $font-30) {
+  font-size: $size;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+/// 键盘焦点环（可访问性：所有可点元素都要有 focus 反馈）
+@mixin focus-ring {
+  &:focus-visible {
+    outline: 2px solid var(--app-color-primary);
+    outline-offset: 2px;
+  }
+}
+
+/// 骨架屏块（配合 motion.scss 的 shimmer 关键帧）
+@mixin skeleton-block {
+  position: relative;
+  overflow: hidden;
+  background: var(--app-bg-subtle);
+  border-radius: var(--app-radius-control);
+
+  &::after {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 65%), transparent);
+    animation: shimmer 1.4s var(--app-ease) infinite;
+    content: '';
+  }
 }

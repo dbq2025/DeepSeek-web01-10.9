@@ -1,12 +1,296 @@
 /**
  * Element Plus 主题覆盖
  * 说明：通过 CSS 变量覆盖组件库默认样式，禁止直接改 element-plus 源码
+ * 顺序：变量层（颜色 / 文字 / 边框 / 背景 / 填充 / 圆角 / 字号）→ 组件级选择器
+ * 约束：只写变量与普通选择器，不使用 !important
  * 注意：本文件由 index.scss 以 @use 引入，属于独立编译单元，
  *      不会获得 vite.config.js 的 additionalData 注入，故需自行 @use 变量文件
- *      （SCSS 模块有加载缓存，不会与注入的那次重复加载冲突）
  */
 @use 'variables' as *;
 
 :root {
+  // ------------------------------------------------------------ 1. 主色全阶
   --el-color-primary: #{$color-primary};
+  --el-color-primary-dark-2: #{$color-primary-dark-2};
+  --el-color-primary-light-3: #{$color-primary-light-3};
+  --el-color-primary-light-5: #{$color-primary-light-5};
+  --el-color-primary-light-7: #{$color-primary-light-7};
+  --el-color-primary-light-8: #{$color-primary-light-8};
+  --el-color-primary-light-9: #{$color-primary-light-9};
+
+  // ------------------------------------------------------------ 2. 语义色（light-9 供 el-tag 浅底使用）
+  --el-color-success: #{$color-success};
+  --el-color-success-light-9: #{#e7f8ef};
+  --el-color-warning: #{$color-warning};
+  --el-color-warning-light-9: #{#fef4e6};
+  --el-color-danger: #{$color-danger};
+  --el-color-danger-light-9: #{#feeceb};
+  --el-color-error: #{$color-danger};
+  --el-color-error-light-9: #{#feeceb};
+  --el-color-info: #{$color-info};
+  --el-color-info-light-9: #{#f1f3f5};
+
+  // ------------------------------------------------------------ 3. 文字层级
+  --el-text-color-primary: #{$neutral-900};
+  --el-text-color-regular: #{$neutral-600};
+  --el-text-color-secondary: #{$neutral-500};
+  --el-text-color-placeholder: #{$neutral-400};
+  --el-text-color-disabled: #{$neutral-400};
+
+  // ------------------------------------------------------------ 4. 边框
+  --el-border-color: #{$neutral-300};
+  --el-border-color-light: #{$neutral-200};
+  --el-border-color-lighter: #{$neutral-200};
+  --el-border-color-extra-light: #{$neutral-200};
+  --el-border-color-hover: #{$neutral-400};
+
+  // ------------------------------------------------------------ 5. 背景
+  --el-bg-color: #{$neutral-0};
+  --el-bg-color-page: #{$neutral-50};
+  --el-bg-color-overlay: #{$neutral-0};
+
+  // ------------------------------------------------------------ 6. 填充
+  --el-fill-color: #{$neutral-100};
+  --el-fill-color-light: #{$neutral-50};
+  --el-fill-color-lighter: #{$neutral-50};
+  --el-fill-color-extra-light: #{$neutral-25};
+  --el-fill-color-blank: #{$neutral-0};
+
+  // ------------------------------------------------------------ 7. 圆角
+  --el-border-radius-base: #{$radius-sm};
+  --el-border-radius-small: 6px;
+  --el-border-radius-round: #{$radius-pill};
+
+  // ------------------------------------------------------------ 8. 字体
+  --el-font-size-base: #{$font-14};
+  --el-font-size-small: #{$font-13};
+  --el-font-size-extra-small: #{$font-12};
+
+  // ------------------------------------------------------------ 9. 阴影（下拉 / 弹层统一）
+  --el-box-shadow-light: #{$shadow-2};
+  --el-box-shadow: #{$shadow-3};
+  --el-box-shadow-dark: #{$shadow-4};
+}
+
+// ================================================================ 组件级
+
+// ---------- 按钮：统一 36px 高、500 字重、8px 圆角
+.el-button {
+  height: 36px;
+  padding: 0 16px;
+  font-weight: 500;
+  border-radius: var(--app-radius-control);
+
+  &.is-circle,
+  &.is-round {
+    border-radius: var(--app-radius-pill);
+  }
+
+  &.el-button--small {
+    height: 32px;
+    padding: 0 12px;
+  }
+
+  &.el-button--large {
+    height: 44px;
+    padding: 0 24px;
+  }
+
+  // 文字按钮（链接式）不受固定高度约束
+  &.is-text,
+  &.is-link {
+    height: auto;
+    padding: 0 4px;
+  }
+}
+
+// ---------- 输入框 / 选择器：默认用 1px 描边而非阴影，focus 时换主色 + 3px 光晕
+.el-input__wrapper,
+.el-select__wrapper,
+.el-textarea__inner {
+  border-radius: var(--app-radius-control);
+  box-shadow: 0 0 0 1px var(--app-border) inset;
+  transition: box-shadow var(--app-dur) var(--app-ease);
+
+  &:hover {
+    box-shadow: 0 0 0 1px var(--app-border-strong) inset;
+  }
+
+  &.is-focus,
+  &:focus-within {
+    box-shadow:
+      0 0 0 1px var(--el-color-primary) inset,
+      0 0 0 3px var(--el-color-primary-light-9);
+  }
+}
+
+.el-input__inner::placeholder,
+.el-textarea__inner::placeholder {
+  color: var(--app-text-4);
+}
+
+// ---------- 卡片：去掉边框，改用阴影 + 12px 圆角
+.el-card {
+  border: none;
+  border-radius: var(--app-radius-card);
+  box-shadow: var(--app-shadow-card);
+}
+
+// ---------- 表格：浅色表头 + 行高 52 + hover 高亮（去斑马纹）
+.el-table {
+  --el-table-header-bg-color: #{$neutral-25};
+  --el-table-row-hover-bg-color: #{$neutral-50};
+  --el-table-border-color: #{$neutral-200};
+  --el-table-text-color: #{$neutral-900};
+  --el-table-header-text-color: #{$neutral-600};
+
+  font-size: $font-14;
+
+  th.el-table__cell {
+    font-weight: 600;
+    padding: 12px 0;
+  }
+
+  td.el-table__cell {
+    padding: 12px 0;
+  }
+
+  .el-table__cell {
+    height: $table-row-h;
+  }
+}
+
+// ---------- 深色导航：全量覆盖 --el-menu-* 变量，不写 :deep 硬改
+.el-menu {
+  --el-menu-bg-color: #{$nav-bg};
+  --el-menu-text-color: #{$nav-text};
+  --el-menu-active-color: #{$nav-text-active};
+  --el-menu-hover-bg-color: #{$nav-bg-hover};
+  --el-menu-hover-text-color: #{$nav-text-active};
+  --el-menu-item-height: 44px;
+  --el-menu-sub-item-height: 40px;
+  --el-menu-border-color: transparent;
+
+  border-right: none;
+
+  .el-menu-item {
+    height: 44px;
+    margin: 2px 10px;
+    border-radius: var(--app-radius-control);
+    font-size: $font-14;
+    line-height: 44px;
+
+    &:hover {
+      background: var(--el-menu-hover-bg-color);
+      color: var(--el-menu-hover-text-color);
+    }
+
+    &.is-active {
+      background: var(--el-color-primary);
+      color: var(--el-menu-active-color);
+      font-weight: 500;
+
+      // 选中态在左侧补 3px 主色亮条，折叠态也能辨识
+      &::before {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        width: 3px;
+        height: 18px;
+        background: var(--el-color-primary-light-5);
+        border-radius: 0 2px 2px 0;
+        transform: translateY(-50%);
+        content: '';
+      }
+    }
+  }
+
+  // 折叠态：图标水平居中，避免 10px margin 造成偏移
+  &.el-menu--collapse {
+    width: $admin-sidebar-collapsed-w;
+
+    .el-menu-item {
+      justify-content: center;
+      margin: 2px 8px;
+      padding: 0;
+    }
+  }
+}
+
+// ---------- 标签：无边框 + 6px 圆角 + 500 字重
+.el-tag {
+  height: 24px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+// ---------- 弹窗：16px 圆角（头部留白由内容区自身控制）
+.el-dialog {
+  padding: 20px 24px;
+  border-radius: var(--app-radius-panel);
+}
+
+.el-dialog__header {
+  margin-right: 0;
+  padding-bottom: 16px;
+  font-weight: 600;
+}
+
+// ---------- 分页：按钮 32px + 6px 圆角
+.el-pagination {
+  --el-pagination-button-width: 32px;
+  --el-pagination-button-height: 32px;
+
+  .el-pager li,
+  .btn-prev,
+  .btn-next {
+    border-radius: 6px;
+  }
+}
+
+// ---------- 消息 / 下拉菜单浮层
+.el-message {
+  border-radius: 10px;
+  box-shadow: var(--app-shadow-3);
+}
+
+.el-dropdown-menu,
+.el-popper.is-light {
+  border-radius: var(--app-radius-card);
+  box-shadow: var(--app-shadow-3);
+}
+
+.el-dropdown-menu__item {
+  border-radius: 6px;
+  font-size: $font-14;
+}
+
+// ---------- 骨架屏：跟随新底色，避免默认灰偏暖
+.el-skeleton {
+  --el-skeleton-color: #{$neutral-100};
+  --el-skeleton-to-color: #{$neutral-50};
+}
+
+// ---------- 面包屑：字号收敛到 13
+.el-breadcrumb {
+  font-size: $font-13;
+}
+
+// ---------- 单选按钮组：胶囊化（搜索页分类筛选用）
+.el-radio-group.is-pill {
+  gap: 8px;
+
+  .el-radio-button__inner {
+    border: 1px solid var(--app-border);
+    border-radius: var(--app-radius-pill);
+    margin-left: 0;
+    font-weight: 500;
+  }
+
+  .el-radio-button:first-child .el-radio-button__inner,
+  .el-radio-button:last-child .el-radio-button__inner {
+    border-radius: var(--app-radius-pill);
+  }
 }

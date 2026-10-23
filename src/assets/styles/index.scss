@@ -1,10 +1,13 @@
 /**
  * 全局样式入口
- * 职责：引入 Element Plus 主题覆盖与全局基础样式
+ * 职责：按「令牌 → 动效 → 组件覆盖 → 基础样式」顺序装配全站样式
  * 注意：variables.scss / mixins.scss 已由 vite.config.js 的 additionalData 统一注入，
- *       此处不能再次 @use，否则同一模块被加载两次会报错
+ *       此处不能再次 @use，否则同一模块被加载两次会报错；
+ *       而被 @use 引入的子文件属独立编译单元，须在各自文件头自行 @use 'variables'
  */
 
+@use './tokens.scss';
+@use './motion.scss';
 @use './element-override.scss';
 
 * {
@@ -20,6 +23,49 @@ body,
 }
 
 body {
+  background: var(--app-bg-page);
+  color: var(--app-text-1);
   font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
-  color: $text-primary;
+  font-size: $font-14;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// 标题默认无外边距（页面层级由组件控制，避免各页面对不齐）
+h1,
+h2,
+h3,
+h4,
+p {
+  margin: 0;
+}
+
+// 可访问性：键盘焦点统一反馈（P4-3）
+a,
+button,
+[tabindex]:not([tabindex='-1']) {
+  @include focus-ring;
+}
+
+// 骨架屏通用块（P4-2）：首页 / 搜索 / 详情 / 看板加载态统一用 .skeleton
+.skeleton {
+  @include skeleton-block;
+
+  &--text {
+    height: 14px;
+    border-radius: 6px;
+  }
+
+  &--title {
+    height: 20px;
+    border-radius: 6px;
+  }
+
+  // 图片类占位：4:3，与商品卡封面一致
+  &--media {
+    aspect-ratio: 4 / 3;
+    border-radius: var(--app-radius-card);
+  }
 }
