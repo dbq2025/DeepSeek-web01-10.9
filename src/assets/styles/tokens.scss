@@ -50,4 +50,9 @@
   --app-chart-3: #{nth($chart-colors, 3)};
   --app-chart-4: #{nth($chart-colors, 4)};
   --app-chart-5: #{nth($chart-colors, 5)};
+
+  // ---------- 分类入口图标底色（--app-cat-1..6，按下标循环取用）
+  @each $index, $tint in $dot-colors {
+    --app-cat-#{$index}: #{$tint};
+  }
 }

@@ -1,43 +1,38 @@
 <!--
   前台首页
-  职责：轮播广告 + 商品类型快捷入口 + 热门推荐商品网格
+  职责：首屏轮播 + 商品类型快捷入口 + 热门推荐商品网格
   数据：/home/banners、/goods/recommend、类型走 categoryStore 缓存
+  说明：改造只调整模板结构与样式，所有请求与 catch 兜底逻辑保持不变
 -->
 <template>
   <div class="home">
-    <!-- 轮播 -->
-    <el-carousel v-if="banners.length" class="home__carousel" height="300px" :interval="4500">
-      <el-carousel-item v-for="item in banners" :key="item.id">
-        <img class="home__banner" :src="item.image" :alt="item.title" />
-      </el-carousel-item>
-    </el-carousel>
-    <div v-else class="home__carousel"><el-skeleton animated :rows="6" /></div>
+    <!-- 首屏：图 + 遮罩 + HTML 文案层 -->
+    <HomeHero v-if="banners.length" :banners="banners" />
+    <div v-else class="home__hero-skeleton skeleton" />
 
     <!-- 分类快捷入口 -->
     <section class="home__panel">
-      <h2 class="home__title">商品分类</h2>
-      <div class="home__cats">
-        <router-link
-          v-for="item in categoryStore.list"
-          :key="item.id"
-          class="home__cat"
-          :to="{ path: '/search', query: { categoryId: item.id } }"
-        >
-          <span class="home__cat-dot" />
-          <span class="home__cat-name">{{ item.name }}</span>
-        </router-link>
-      </div>
+      <SectionHeading title="商品分类" description="按品类快速筛选" />
+      <CategoryNav :categories="categoryStore.list" />
     </section>
 
     <!-- 热门推荐 -->
     <section class="home__panel">
-      <div class="home__head">
-        <h2 class="home__title">热门推荐</h2>
-        <router-link class="home__more" to="/search">查看全部商品 →</router-link>
-      </div>
+      <SectionHeading title="热门推荐" description="近 30 天销量领先">
+        <template #extra>
+          <router-link class="home__more" to="/search">
+            查看全部
+            <el-icon><ArrowRight /></el-icon>
+          </router-link>
+        </template>
+      </SectionHeading>
 
       <div v-if="loading" class="home__grid">
-        <el-skeleton v-for="n in 8" :key="n" animated :rows="6" />
+        <div v-for="n in 8" :key="n" class="home__card-skeleton">
+          <div class="skeleton skeleton--media" />
+          <div class="skeleton skeleton--title" />
+          <div class="skeleton skeleton--text" />
+        </div>
       </div>
       <div v-else-if="recommends.length" class="home__grid">
         <GoodsCard v-for="item in recommends" :key="item.id" :goods="item" />
@@ -49,7 +44,11 @@
 
 <script setup>
 import { onMounted, ref } from 'vue'
+import { ArrowRight } from '@element-plus/icons-vue'
+import HomeHero from '@/components/before/HomeHero.vue'
+import CategoryNav from '@/components/before/CategoryNav.vue'
 import GoodsCard from '@/components/before/GoodsCard.vue'
+import SectionHeading from '@/components/common/SectionHeading.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import { getBannersApi, getRecommendGoodsApi } from '@/api/before/goods'
 import { useCategoryStore } from '@/store/modules/category'
@@ -83,127 +82,75 @@ onMounted(loadHomeData)
 .home {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: $space-5;
 
-  &__carousel {
-    overflow: hidden;
-    border-radius: 10px;
-  }
-
-  &__banner {
-    width: 100%;
-    height: 100%;
-    display: block;
-    object-fit: cover;
+  &__hero-skeleton {
+    height: 360px;
+    border-radius: var(--app-radius-panel);
   }
 
   &__panel {
-    @include card-surface;
-
-    padding: 16px 20px 20px;
-  }
-
-  &__head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  &__title {
-    margin: 0;
-    padding-left: 10px;
-    border-left: 3px solid $color-primary;
-    font-size: 17px;
-    font-weight: 600;
-    line-height: 1.2;
-    color: var(--el-text-color-primary);
+    @include card-surface($space-6);
   }
 
   &__more {
-    color: var(--el-text-color-secondary);
-    font-size: 13px;
-    text-decoration: none;
-
-    &:hover {
-      color: $color-primary;
-    }
-  }
-
-  &__cats {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 12px;
-    margin-top: 16px;
-  }
-
-  &__cat {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 14px 8px;
-    border: 1px solid var(--el-border-color-lighter);
-    border-radius: 8px;
-    background: var(--el-bg-color);
-    color: var(--el-text-color-regular);
-    font-size: 14px;
+    gap: 4px;
+    color: var(--app-text-3);
+    font-size: $font-13;
     text-decoration: none;
-    transition: all 0.2s;
+    transition: color var(--app-dur) var(--app-ease);
+    @include focus-ring;
 
     &:hover {
-      border-color: $color-primary;
-      color: $color-primary;
-      transform: translateY(-2px);
+      color: var(--app-color-primary);
     }
   }
 
-  &__cat-dot {
-    width: 8px;
-    height: 8px;
-    flex: none;
-    border-radius: 50%;
-  }
-
-  // 圆点配色按 $dot-colors 循环取用（nth-child 为 1 起算，与 $dot-colors 的键 1..6 对齐）
-  @each $index, $color in $dot-colors {
-    .home__cats .home__cat:nth-child(#{length($dot-colors)}n + #{$index}) .home__cat-dot {
-      background: $color;
-    }
-  }
-
+  // 商品网格：4 列，24px 间距（与卡片内边距构成呼吸感）
   &__grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin-top: 16px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: $space-5;
+    margin-top: $space-5;
+    align-items: stretch;
+  }
+
+  &__card-skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: $space-3;
+    padding: $space-3;
+    background: var(--app-bg-card);
+    border-radius: var(--app-radius-card);
+    box-shadow: var(--app-shadow-card);
   }
 }
 
 @include respond-below('lg') {
   .home__grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@include respond-below('md') {
+  .home__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .home__cats {
-    grid-template-columns: repeat(3, 1fr);
+  .home__panel {
+    padding: $space-4;
   }
 }
 
 @include respond-below('sm') {
   .home__grid {
-    grid-template-columns: repeat(2, 1fr);
+    gap: $space-3;
   }
 
-  .home__cats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  // 轮播原图比例 1200:360（见 mock/db.js 的 buildBanner）。
-  // 窄屏若沿用固定高度 300px，cover 会把左右两侧裁掉导致标题不完整；
-  // 这里让容器高度随宽度按原图比例计算，保证整图可见。
-  .home__carousel :deep(.el-carousel__container) {
-    height: auto !important;
-    aspect-ratio: 10 / 3;
+  .home__hero-skeleton {
+    height: 160px;
   }
 }
 </style>

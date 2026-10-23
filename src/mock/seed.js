@@ -101,11 +101,30 @@ const USER_SEED = [
   }
 ]
 
-/** 轮播图标题种子 */
+/**
+ * 轮播文案种子
+ * 说明：tag / title / subtitle / cta 为**新增字段**，供前台 HomeHero 用 HTML 叠加排版；
+ *      接口 URL 与返回数组结构不变，旧数据缺字段时前端 v-if 兜底
+ */
 const BANNER_SEED = [
-  '新机首发 · 至高立减 800 元',
-  '家电焕新季 · 满 3000 减 300',
-  '秋季出行 · 户外装备 5 折起'
+  {
+    tag: '新品首发',
+    title: '新机首发 · 至高立减 800 元',
+    subtitle: '旗舰影像与长续航兼得，首发期享 12 期免息',
+    cta: '立即选购'
+  },
+  {
+    tag: '家电焕新',
+    title: '家电焕新季 · 满 3000 减 300',
+    subtitle: '冰箱、洗衣机、空调全场参与，送装一体',
+    cta: '查看会场'
+  },
+  {
+    tag: '秋季出行',
+    title: '秋季出行 · 户外装备 5 折起',
+    subtitle: '冲锋衣、登山杖、露营套装限时直降',
+    cta: '去逛逛'
+  }
 ]
 
 /**
@@ -232,10 +251,10 @@ export function createSeed() {
     orders,
     users,
     favorites,
-    banners: BANNER_SEED.map((title, i) => ({
+    banners: BANNER_SEED.map((item, i) => ({
       id: i + 1,
-      title,
-      image: buildBanner(title, i + 1),
+      ...item,
+      image: buildBanner(i + 1),
       sort: i + 1
     }))
   }
