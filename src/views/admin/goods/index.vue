@@ -5,22 +5,38 @@
 -->
 <template>
   <div class="goods">
+    <PageHeader
+      title="商品信息管理"
+      :badge="`共 ${total} 件`"
+      description="维护商品资料、库存与上下架状态"
+    >
+      <template #actions>
+        <el-button type="primary" @click="goCreate">新增商品</el-button>
+      </template>
+    </PageHeader>
+
     <SearchForm
       :model-value="query"
       :fields="searchFields"
       :loading="loading"
       @search="search"
       @reset="reset"
-    >
-      <el-button type="primary" @click="goCreate">新增商品</el-button>
-    </SearchForm>
+    />
 
     <section class="goods__panel">
       <div class="goods__toolbar">
-        <el-button :disabled="selectedIds.length === 0" @click="onBatchStatus(GOODS_STATUS.ON)">
+        <el-button
+          size="small"
+          :disabled="selectedIds.length === 0"
+          @click="onBatchStatus(GOODS_STATUS.ON)"
+        >
           批量上架
         </el-button>
-        <el-button :disabled="selectedIds.length === 0" @click="onBatchStatus(GOODS_STATUS.OFF)">
+        <el-button
+          size="small"
+          :disabled="selectedIds.length === 0"
+          @click="onBatchStatus(GOODS_STATUS.OFF)"
+        >
           批量下架
         </el-button>
         <span class="goods__tip">已选 {{ selectedIds.length }} 项</span>
@@ -71,6 +87,7 @@ import SearchForm from '@/components/common/SearchForm.vue'
 import DataTable from '@/components/common/DataTable.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
+import PageHeader from '@/components/common/PageHeader.vue'
 import { useTable } from '@/composables/useTable'
 import { useCategoryStore } from '@/store/modules/category'
 import { useGoodsStore } from '@/store/modules/goods'
@@ -113,16 +130,18 @@ const searchFields = computed(() => [
   }
 ])
 
+// 列宽按「1280 视口下 968px 可用宽度」预算（含 48px 多选列，总和 ≈ 940px）：
+// 保证 1280 宽不出现横向滚动条，1440 宽时富余空间自动分给「商品」列
 const columns = [
-  { prop: 'cover', label: '图片', type: 'image', width: 82, align: 'center' },
-  { prop: 'name', label: '商品', minWidth: 220 },
-  { prop: 'categoryName', label: '类型', width: 110 },
-  { prop: 'price', label: '价格', type: 'money', width: 110, align: 'right' },
-  { prop: 'stock', label: '库存', width: 90, align: 'right' },
-  { prop: 'sales', label: '销量', width: 90, align: 'right' },
-  { prop: 'status', label: '状态', type: 'tag', tagKind: 'goods', width: 100, align: 'center' },
-  { prop: 'createTime', label: '创建时间', type: 'date', width: 170 },
-  { label: '操作', type: 'action', width: 180, align: 'center', fixed: 'right' }
+  { prop: 'cover', label: '图片', type: 'image', width: 64, align: 'center' },
+  { prop: 'name', label: '商品', minWidth: 160 },
+  { prop: 'categoryName', label: '类型', width: 88 },
+  { prop: 'price', label: '价格', type: 'money', width: 96, align: 'right' },
+  { prop: 'stock', label: '库存', width: 64, align: 'right' },
+  { prop: 'sales', label: '销量', width: 64, align: 'right' },
+  { prop: 'status', label: '状态', type: 'tag', tagKind: 'goods', width: 84, align: 'center' },
+  { prop: 'createTime', label: '创建时间', type: 'date', width: 136 },
+  { label: '操作', type: 'action', width: 140, align: 'center', fixed: 'right' }
 ]
 
 /**
@@ -255,23 +274,28 @@ watch(query, () => {
   &__panel {
     @include card-surface;
 
-    padding: 16px 16px 8px;
+    padding: $space-2 $space-5 $space-4;
   }
 
+  // 批量操作条：常驻顶部，浅底分隔，避免与表头混在一起
   &__toolbar {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 12px;
+    gap: $space-2;
+    padding: $space-3 0;
+    border-bottom: 1px solid var(--app-bg-subtle);
+    margin-bottom: $space-1;
   }
 
   &__tip {
-    color: var(--el-text-color-secondary);
-    font-size: 13px;
+    margin-left: $space-1;
+    color: var(--app-text-3);
+    font-size: $font-13;
+    font-variant-numeric: tabular-nums;
   }
 
   &__name {
-    color: var(--el-text-color-primary);
+    color: var(--app-text-1);
     font-weight: 500;
   }
 
@@ -279,8 +303,14 @@ watch(query, () => {
     @include ellipsis;
 
     margin-top: 2px;
-    color: var(--el-text-color-secondary);
-    font-size: 12px;
+    color: var(--app-text-3);
+    font-size: $font-12;
+  }
+}
+
+@include respond-below('sm') {
+  .goods__panel {
+    padding: $space-2 $space-3 $space-3;
   }
 }
 </style>

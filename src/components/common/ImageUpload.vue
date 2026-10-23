@@ -101,8 +101,8 @@ async function onFileChange(uploadFile) {
     justify-content: center;
     overflow: hidden;
     cursor: pointer;
-    background: var(--el-fill-color-lighter);
-    border: 1px dashed var(--el-border-color);
+    background: var(--app-bg-subtle);
+    border: 1px dashed var(--app-border-strong);
     border-radius: 6px;
     transition: border-color 0.2s;
 
@@ -122,7 +122,7 @@ async function onFileChange(uploadFile) {
     flex-direction: column;
     align-items: center;
     gap: 6px;
-    color: var(--el-text-color-secondary);
+    color: var(--app-text-3);
     font-size: 12px;
   }
 
@@ -132,7 +132,7 @@ async function onFileChange(uploadFile) {
 
   &__tip {
     margin: 6px 0 0;
-    color: var(--el-text-color-secondary);
+    color: var(--app-text-3);
     font-size: 12px;
     line-height: 1.5;
   }

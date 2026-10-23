@@ -64,27 +64,38 @@ const isUnpaid = computed(() => props.order.status === ORDER_STATUS.UNPAID)
 
 <style scoped lang="scss">
 .order-card {
-  @include card-surface;
-
   overflow: hidden;
+  background: var(--app-bg-card);
+  border: 1px solid transparent;
+  border-radius: var(--app-radius-card);
+  box-shadow: var(--app-shadow-card);
+  transition: box-shadow var(--app-dur) var(--app-ease);
 
+  &:hover {
+    box-shadow: var(--app-shadow-3);
+  }
+
+  // 卡头：浅底 + 1px 分隔，与卡体区分层级
   &__head {
     display: flex;
     align-items: center;
-    gap: 16px;
-    padding: 12px 18px;
-    border-bottom: 1px solid var(--el-border-color-lighter);
-    background: var(--el-fill-color-lighter);
-    font-size: 13px;
+    gap: $space-4;
+    padding: $space-3 $space-5;
+    background: var(--app-bg-subtle);
+    font-size: $font-13;
   }
 
+  // 订单号用等宽数字，多笔订单纵向对比时位宽一致
   &__no {
-    color: var(--el-text-color-primary);
+    color: var(--app-text-1);
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: $font-13;
     font-weight: 600;
+    font-variant-numeric: tabular-nums;
   }
 
   &__time {
-    color: var(--el-text-color-secondary);
+    color: var(--app-text-3);
   }
 
   &__head :last-child {
@@ -93,34 +104,39 @@ const isUnpaid = computed(() => props.order.status === ORDER_STATUS.UNPAID)
 
   &__body {
     display: flex;
-    gap: 20px;
-    padding: 16px 18px;
+    gap: $space-5;
+    padding: $space-4 $space-5;
   }
 
   &__items {
+    display: flex;
     flex: 1;
+    flex-direction: column;
+    gap: $space-3;
     margin: 0;
     padding: 0;
     list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
   }
 
   &__item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    color: var(--el-text-color-primary);
-    font-size: 14px;
+    gap: $space-3;
+    color: var(--app-text-1);
+    font-size: $font-14;
     cursor: pointer;
+
+    &:hover .order-card__name {
+      color: var(--app-color-primary);
+    }
   }
 
   &__img {
+    flex: none;
     width: 48px;
     height: 48px;
-    flex: none;
-    border-radius: 6px;
+    background: var(--app-bg-subtle);
+    border-radius: var(--app-radius-control);
     object-fit: cover;
   }
 
@@ -128,11 +144,13 @@ const isUnpaid = computed(() => props.order.status === ORDER_STATUS.UNPAID)
     @include ellipsis;
 
     flex: 1;
+    transition: color var(--app-dur) var(--app-ease);
   }
 
   &__count {
-    color: var(--el-text-color-secondary);
-    font-size: 13px;
+    color: var(--app-text-3);
+    font-size: $font-13;
+    font-variant-numeric: tabular-nums;
   }
 
   &__side {
@@ -141,33 +159,36 @@ const isUnpaid = computed(() => props.order.status === ORDER_STATUS.UNPAID)
     flex-direction: column;
     align-items: flex-end;
     justify-content: space-between;
-    gap: 12px;
+    gap: $space-3;
     width: 230px;
   }
 
   &__amount {
     margin: 0;
-    color: var(--el-text-color-regular);
-    font-size: 13px;
+    color: var(--app-text-3);
+    font-size: $font-13;
     text-align: right;
 
     b {
       display: block;
-      margin-top: 4px;
-      color: $color-price;
-      font-size: 20px;
+      margin-top: 2px;
+      color: var(--app-color-price);
+      font-size: $font-20;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
     }
   }
 
   &__actions {
     display: flex;
-    gap: 8px;
+    gap: $space-2;
   }
 }
 
 @include respond-below('md') {
   .order-card__body {
     flex-direction: column;
+    padding: $space-4;
   }
 
   .order-card__side {

@@ -6,7 +6,12 @@
 <template>
   <div class="login">
     <div class="login__panel">
-      <h1 class="login__title">电商管理后台</h1>
+      <div class="login__brand">
+        <BrandMark :size="28" />
+        <span>电商管理后台</span>
+      </div>
+
+      <h1 class="login__title">登录后台</h1>
       <p class="login__subtitle">电子商务平台前端系统 · 后台管理端</p>
 
       <el-form ref="formRef" :model="form" :rules="rules" size="large" @submit.prevent>
@@ -36,6 +41,7 @@
       </el-form>
 
       <el-alert
+        class="login__demo"
         type="info"
         :closable="false"
         show-icon
@@ -52,6 +58,7 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import { Lock, User } from '@element-plus/icons-vue'
+import BrandMark from '@/components/common/BrandMark.vue'
 import { useAuth } from '@/composables/useAuth'
 import { required } from '@/utils/validate'
 
@@ -91,38 +98,49 @@ async function onSubmit() {
 </script>
 
 <style scoped lang="scss">
+// 后台登录页：深色底 + 居中白卡，与前台登录页的「左右分栏」刻意区分开
 .login {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  padding: 24px;
-  background: linear-gradient(
-    135deg,
-    var(--el-color-primary-dark-2),
-    var(--el-color-primary-light-3)
-  );
+  padding: $space-6;
+  background:
+    radial-gradient(1200px 600px at 15% 0%, rgb(51 85 224 / 28%), transparent 60%),
+    radial-gradient(900px 500px at 90% 100%, rgb(122 90 248 / 22%), transparent 55%), $nav-bg;
 
   &__panel {
     width: 100%;
-    max-width: 380px;
-    padding: 32px 28px 24px;
-    background: var(--el-bg-color);
-    border-radius: 10px;
-    box-shadow: 0 8px 28px rgb(0 0 0 / 14%);
+    max-width: 400px;
+    padding: $space-8 $space-6 $space-6;
+    background: var(--app-bg-card);
+    border-radius: var(--app-radius-panel);
+    box-shadow: 0 24px 60px rgb(6 12 28 / 45%);
+  }
+
+  &__brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: $space-5;
+    color: var(--app-color-primary);
+    font-size: $font-14;
+    font-weight: 600;
   }
 
   &__title {
     margin: 0;
-    color: var(--el-text-color-primary);
-    font-size: 22px;
+    color: var(--app-text-1);
+    font-size: $font-20;
+    font-weight: 600;
     text-align: center;
   }
 
   &__subtitle {
-    margin: 6px 0 24px;
-    color: var(--el-text-color-secondary);
-    font-size: 12px;
+    margin: 6px 0 $space-6;
+    color: var(--app-text-3);
+    font-size: $font-12;
     text-align: center;
   }
 
@@ -130,10 +148,21 @@ async function onSubmit() {
     width: 100%;
   }
 
+  &__demo {
+    margin-top: $space-2;
+    border-radius: var(--app-radius-control);
+  }
+
   &__footer {
-    margin-top: 16px;
-    font-size: 13px;
+    margin-top: $space-4;
+    font-size: $font-13;
     text-align: center;
+
+    a {
+      color: var(--app-color-primary);
+      font-weight: 500;
+      text-decoration: none;
+    }
   }
 }
 </style>

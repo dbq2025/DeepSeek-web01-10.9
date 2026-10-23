@@ -63,11 +63,11 @@ onMounted(loadRelated)
   &__title {
     margin: 0 0 14px;
     padding-left: 10px;
-    border-left: 3px solid $color-primary;
+    border-left: 3px solid var(--app-color-primary);
     font-size: 17px;
     font-weight: 600;
     line-height: 1.2;
-    color: var(--el-text-color-primary);
+    color: var(--app-text-1);
   }
 
   &__grid {

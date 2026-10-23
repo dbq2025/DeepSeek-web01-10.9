@@ -6,7 +6,7 @@
 -->
 <template>
   <div class="profile">
-    <h2 class="profile__title">个人信息</h2>
+    <PageHeader title="个人信息" description="昵称与头像会同步显示在顶栏，手机号用于下单时预填" />
 
     <section class="profile__panel">
       <el-skeleton v-if="loading" :rows="6" animated />
@@ -56,6 +56,7 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import ImageUpload from '@/components/common/ImageUpload.vue'
+import PageHeader from '@/components/common/PageHeader.vue'
 import { getUserProfileApi, updateUserProfileApi } from '@/api/before/auth'
 import { useUserStore } from '@/store/modules/user'
 import { NICKNAME_MAX, PHONE_RULE, required } from '@/utils/validate'
@@ -126,26 +127,14 @@ onMounted(async () => {
 .profile {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-
-  &__title {
-    margin: 0;
-    padding-left: 10px;
-    border-left: 3px solid $color-primary;
-    font-size: 17px;
-    font-weight: 600;
-    line-height: 1.2;
-    color: var(--el-text-color-primary);
-  }
+  gap: $space-4;
 
   &__panel {
-    @include card-surface;
-
-    padding: 22px 24px 6px;
+    @include card-surface($space-6);
   }
 
   &__form {
-    max-width: 460px;
+    max-width: 480px;
   }
 }
 </style>

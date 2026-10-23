@@ -93,7 +93,7 @@ defineProps({
   /** 是否显示序号列 @type {boolean} */
   showIndex: { type: Boolean, default: false },
   /** 是否斑马纹 @type {boolean} */
-  stripe: { type: Boolean, default: true },
+  stripe: { type: Boolean, default: false },
   /** 是否显示纵向边框 @type {boolean} */
   border: { type: Boolean, default: false },
   /** 表格固定高度，不传则随内容撑开 @type {string|number|undefined} */
@@ -137,7 +137,8 @@ function cellText(col, row) {
   const value = row[col.prop]
   if (value === null || value === undefined || value === '') return '-'
   if (col.type === 'money') return formatMoney(value)
-  if (col.type === 'date') return formatDate(value)
+  // 列表里精确到分钟即可：秒对业务无意义，却会让「创建时间」列多占约 20px 并换行
+  if (col.type === 'date') return formatDate(value, 'YYYY-MM-DD HH:mm')
   return String(value)
 }
 </script>
@@ -146,17 +147,39 @@ function cellText(col, row) {
 .data-table {
   width: 100%;
 
-  // 表头统一浅色底（用 Element Plus CSS 变量，避免硬编码色值）
-  --el-table-header-bg-color: var(--el-fill-color-light);
+  // 表头统一近白底（比卡片底色略深一档，形成「表头/数据」分区）；
+  // 行高与内边距由 element-override.scss 统一为 52px，这里只补细节
+  --el-table-header-bg-color: var(--app-bg-subtle);
+  --el-table-border-color: transparent;
 
   &__thumb {
-    width: 44px;
-    height: 44px;
-    border-radius: 4px;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--app-radius-control);
   }
 
   &__muted {
-    color: var(--el-text-color-placeholder);
+    color: var(--app-text-4);
+  }
+
+  // 操作列：按钮间距 12px，去掉 link 按钮的默认内边距抖动
+  :deep(.el-table__row .cell .el-button + .el-button) {
+    margin-left: $space-3;
+  }
+
+  :deep(.el-button.is-link) {
+    height: auto;
+    padding: 0;
+    font-weight: 500;
+  }
+
+  // 首列 / 末列贴边时补一点内边距，避免文字紧贴卡片圆角
+  :deep(.el-table__cell:first-child .cell) {
+    padding-left: $space-1;
+  }
+
+  :deep(.el-table__cell:last-child .cell) {
+    padding-right: $space-1;
   }
 }
 </style>

@@ -5,6 +5,16 @@
 -->
 <template>
   <div class="order">
+    <PageHeader
+      title="订单管理"
+      :badge="`共 ${total} 笔`"
+      description="按状态流转订单，取消订单会同步回滚库存与销量"
+    >
+      <template #actions>
+        <span class="order__hint">共 {{ total }} 笔订单</span>
+      </template>
+    </PageHeader>
+
     <SearchForm
       :model-value="query"
       :fields="searchFields"
@@ -73,6 +83,7 @@ import SearchForm from '@/components/common/SearchForm.vue'
 import DataTable from '@/components/common/DataTable.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
+import PageHeader from '@/components/common/PageHeader.vue'
 import { useTable } from '@/composables/useTable'
 import { getOrderListApi, updateOrderStatusApi } from '@/api/admin/order'
 import { ORDER_STATUS, ORDER_STATUS_TEXT } from '@/utils/constants'
@@ -94,13 +105,13 @@ const searchFields = [
 ]
 
 const columns = [
-  { prop: 'orderNo', label: '订单号', width: 180 },
-  { prop: 'userName', label: '下单用户', width: 110 },
-  { prop: 'items', label: '商品', width: 130 },
-  { prop: 'totalPrice', label: '订单金额', type: 'money', width: 120, align: 'right' },
-  { prop: 'status', label: '状态', type: 'tag', tagKind: 'order', width: 100, align: 'center' },
-  { prop: 'createTime', label: '下单时间', type: 'date', width: 170 },
-  { label: '操作', type: 'action', width: 170, align: 'center', fixed: 'right' }
+  { prop: 'orderNo', label: '订单号', width: 168 },
+  { prop: 'userName', label: '下单用户', width: 100 },
+  { prop: 'items', label: '商品', width: 120 },
+  { prop: 'totalPrice', label: '订单金额', type: 'money', width: 112, align: 'right' },
+  { prop: 'status', label: '状态', type: 'tag', tagKind: 'order', width: 88, align: 'center' },
+  { prop: 'createTime', label: '下单时间', type: 'date', width: 136 },
+  { label: '操作', type: 'action', width: 140, align: 'center', fixed: 'right' }
 ]
 
 /**
@@ -153,13 +164,27 @@ async function onChangeStatus(target, status) {
   &__panel {
     @include card-surface;
 
-    padding: 16px 16px 8px;
+    padding: $space-2 $space-5 $space-4;
   }
 
+  &__hint {
+    color: var(--app-text-3);
+    font-size: $font-13;
+    font-variant-numeric: tabular-nums;
+  }
+
+  // 订单号用等宽数字，便于逐位比对
   &__no {
-    color: var(--el-text-color-primary);
+    color: var(--app-text-1);
     font-family: 'SFMono-Regular', Consolas, monospace;
-    font-size: 13px;
+    font-size: $font-13;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@include respond-below('sm') {
+  .order__panel {
+    padding: $space-2 $space-3 $space-3;
   }
 }
 </style>

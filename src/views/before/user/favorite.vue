@@ -5,7 +5,7 @@
 -->
 <template>
   <div class="favorite">
-    <h2 class="favorite__title">我的收藏</h2>
+    <PageHeader title="我的收藏" description="收藏的商品下架后仍会保留，可随时取消收藏" />
 
     <div v-loading="loading" class="favorite__body">
       <div v-if="list.length" class="favorite__grid">
@@ -38,6 +38,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import GoodsCard from '@/components/before/GoodsCard.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
+import PageHeader from '@/components/common/PageHeader.vue'
 import { getFavoriteListApi, toggleFavoriteApi } from '@/api/before/order'
 import { useCartStore } from '@/store/modules/cart'
 
@@ -96,38 +97,36 @@ onMounted(loadFavorites)
 .favorite {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-
-  &__title {
-    margin: 0;
-    padding-left: 10px;
-    border-left: 3px solid $color-primary;
-    font-size: 17px;
-    font-weight: 600;
-    line-height: 1.2;
-    color: var(--el-text-color-primary);
-  }
+  gap: $space-4;
 
   &__body {
     min-height: 160px;
   }
 
+  // 与首页 / 搜索页共用同一套网格节奏（4 列 / 20px / 4:3 封面）
   &__grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: $space-5;
+    align-items: stretch;
   }
 }
 
 @include respond-below('lg') {
   .favorite__grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@include respond-below('md') {
+  .favorite__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @include respond-below('sm') {
   .favorite__grid {
-    grid-template-columns: repeat(2, 1fr);
+    gap: $space-3;
   }
 }
 </style>

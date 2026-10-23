@@ -162,7 +162,7 @@ onMounted(loadDetail)
   }
 
   &__title {
-    color: var(--el-text-color-primary);
+    color: var(--app-text-1);
     font-size: 16px;
     font-weight: 500;
   }
@@ -175,13 +175,13 @@ onMounted(loadDetail)
 
   &__subtitle {
     margin: 0 0 12px;
-    color: var(--el-text-color-primary);
+    color: var(--app-text-1);
     font-size: 15px;
   }
 
   &__total {
     padding-top: 12px;
-    color: var(--el-text-color-regular);
+    color: var(--app-text-2);
     font-size: 14px;
     text-align: right;
   }

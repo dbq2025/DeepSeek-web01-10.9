@@ -68,7 +68,7 @@ function onSizeChange(size) {
 .pagination {
   display: flex;
   justify-content: flex-end;
-  padding: 12px 0 4px;
+  padding: $space-4 0 0;
 }
 
 // 窄屏：el-pagination 整块宽度约 450px，靠 flex-end 会向左侧溢出并被裁切。

@@ -6,6 +6,8 @@
 -->
 <template>
   <div class="profile">
+    <PageHeader title="管理员信息" description="账号信息只读，昵称 / 手机号 / 头像可修改" />
+
     <section class="profile__panel">
       <h3 class="profile__subtitle">账号信息</h3>
       <el-descriptions v-loading="loading" :column="1" border>
@@ -52,6 +54,7 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import ImageUpload from '@/components/common/ImageUpload.vue'
+import PageHeader from '@/components/common/PageHeader.vue'
 import { useUserStore } from '@/store/modules/user'
 import { getAdminProfileApi, updateAdminProfileApi } from '@/api/admin/auth'
 import { formatDate } from '@/utils/format'
@@ -133,20 +136,21 @@ onMounted(loadProfile)
 <style scoped lang="scss">
 .profile {
   &__panel {
-    @include card-surface;
+    @include card-surface($space-6);
 
-    max-width: 720px;
-    margin-bottom: 16px;
+    max-width: 760px;
+    margin-bottom: $space-5;
   }
 
   &__subtitle {
-    margin: 0 0 12px;
-    color: var(--el-text-color-primary);
+    margin: 0 0 $space-4;
+    color: var(--app-text-1);
     font-size: 15px;
+    font-weight: 600;
   }
 
   &__form {
-    max-width: 520px;
+    max-width: 560px;
   }
 }
 </style>

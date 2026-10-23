@@ -25,6 +25,6 @@ const router = useRouter()
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: var(--el-bg-color-page);
+  background: var(--app-bg-page);
 }
 </style>

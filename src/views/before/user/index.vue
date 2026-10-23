@@ -64,12 +64,12 @@ onMounted(async () => {
 <style scoped lang="scss">
 .user-center {
   display: grid;
-  grid-template-columns: 220px 1fr;
-  gap: 16px;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: $space-4;
   align-items: start;
 
   &__side {
-    @include card-surface;
+    @include card-surface(0);
 
     overflow: hidden;
   }
@@ -79,25 +79,47 @@ onMounted(async () => {
     flex-direction: column;
     align-items: center;
     gap: 6px;
-    padding: 22px 12px 18px;
-    border-bottom: 1px solid var(--el-border-color-lighter);
+    padding: $space-5 $space-3 $space-4;
+    border-bottom: 1px solid var(--app-bg-subtle);
   }
 
   &__nickname {
     margin: 6px 0 0;
-    color: var(--el-text-color-primary);
+    color: var(--app-text-1);
     font-size: 15px;
     font-weight: 600;
   }
 
   &__account {
     margin: 0;
-    color: var(--el-text-color-secondary);
-    font-size: 12px;
+    color: var(--app-text-3);
+    font-size: $font-12;
   }
 
+  // 侧栏菜单：浅色主题（深色导航只用于后台，见 element-override 的 .el-menu--nav）
   &__menu {
+    padding: $space-2 0;
     border-right: none;
+
+    :deep(.el-menu-item) {
+      height: 42px;
+      margin: 2px $space-2;
+      border-radius: var(--app-radius-control);
+      color: var(--app-text-2);
+      font-size: $font-14;
+      line-height: 42px;
+
+      &:hover {
+        background: var(--app-bg-subtle);
+        color: var(--app-color-primary);
+      }
+
+      &.is-active {
+        background: var(--el-color-primary-light-9);
+        color: var(--app-color-primary);
+        font-weight: 500;
+      }
+    }
   }
 
   &__content {
@@ -107,7 +129,7 @@ onMounted(async () => {
 
 @include respond-below('md') {
   .user-center {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 </style>

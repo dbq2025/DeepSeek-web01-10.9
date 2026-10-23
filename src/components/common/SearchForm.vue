@@ -80,25 +80,59 @@ const emit = defineEmits(['search', 'reset'])
 </script>
 
 <style scoped lang="scss">
+// 一整块筛选卡：label 13 灰、控件 36 高、右侧主操作贴边
 .search-form {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: center;
   gap: 0 4px;
-  padding: 14px 16px 0;
-  margin-bottom: 12px;
-  background: var(--el-bg-color);
-  border: 1px solid var(--el-border-color-lighter);
-  border-radius: 6px;
+  padding: $space-4 $space-5 2px;
+  margin-bottom: $space-4;
+  background: var(--app-bg-card);
+  border: 1px solid transparent;
+  border-radius: var(--app-radius-card);
+  box-shadow: var(--app-shadow-card);
 
-  // el-form-item 自带下边距，这里统一收紧
   :deep(.el-form-item) {
-    margin-bottom: 14px;
+    margin-right: $space-4;
+    margin-bottom: $space-3;
+  }
+
+  :deep(.el-form-item__label) {
+    color: var(--app-text-3);
+    font-size: $font-13;
+    font-weight: 500;
+  }
+
+  // 控件统一 36px 高（与按钮同一水平线）
+  :deep(.el-input__wrapper),
+  :deep(.el-select__wrapper) {
+    min-height: 36px;
   }
 
   &__extra {
     margin-left: auto;
-    margin-bottom: 14px;
+    margin-bottom: $space-3;
+  }
+}
+
+@include respond-below('sm') {
+  .search-form {
+    padding: $space-3 $space-4 2px;
+
+    :deep(.el-form-item) {
+      width: 100%;
+      margin-right: 0;
+    }
+
+    :deep(.el-input),
+    :deep(.el-select) {
+      width: 100% !important;
+    }
+
+    &__extra {
+      margin-left: 0;
+    }
   }
 }
 </style>

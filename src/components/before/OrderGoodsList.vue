@@ -78,15 +78,15 @@ function goGoods(item) {
   }
 
   &__name {
-    color: var(--el-text-color-primary);
+    color: var(--app-text-1);
 
     &:hover {
-      color: $color-primary;
+      color: var(--app-color-primary);
     }
   }
 
   &__subtotal {
-    color: $color-price;
+    color: var(--app-color-price);
     font-weight: 600;
   }
 }
@@ -104,7 +104,7 @@ function goGoods(item) {
     align-items: center;
     gap: 12px;
     padding: 10px;
-    border: 1px solid var(--el-border-color-lighter);
+    border: 1px solid var(--app-border);
     border-radius: 8px;
     cursor: pointer;
   }
@@ -126,19 +126,19 @@ function goGoods(item) {
     @include ellipsis;
 
     margin: 0 0 4px;
-    color: var(--el-text-color-primary);
+    color: var(--app-text-1);
     font-size: 14px;
   }
 
   &__meta {
     margin: 0;
-    color: var(--el-text-color-secondary);
+    color: var(--app-text-3);
     font-size: 12px;
   }
 
   &__subtotal {
     flex: none;
-    color: $color-price;
+    color: var(--app-color-price);
     font-size: 15px;
     font-weight: 600;
   }

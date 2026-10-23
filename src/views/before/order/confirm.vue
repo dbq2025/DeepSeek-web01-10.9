@@ -5,7 +5,10 @@
 -->
 <template>
   <div class="confirm">
-    <h2 class="confirm__title">确认订单</h2>
+    <PageHeader
+      title="确认订单"
+      description="核对收货信息与商品明细后提交，提交后可在「我的订单」跟踪状态"
+    />
 
     <EmptyState v-if="!cartStore.checkedItems.length" description="没有待结算的商品">
       <el-button type="primary" @click="router.push('/cart')">返回购物车</el-button>
@@ -63,6 +66,7 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import EmptyState from '@/components/common/EmptyState.vue'
+import PageHeader from '@/components/common/PageHeader.vue'
 import OrderGoodsList from '@/components/before/OrderGoodsList.vue'
 import { createOrderApi } from '@/api/before/order'
 import { getUserProfileApi } from '@/api/before/auth'
@@ -147,59 +151,65 @@ onMounted(async () => {
 .confirm {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-
-  &__title {
-    margin: 0;
-    padding-left: 10px;
-    border-left: 3px solid $color-primary;
-    font-size: 17px;
-    font-weight: 600;
-    line-height: 1.2;
-    color: var(--el-text-color-primary);
-  }
+  gap: $space-4;
 
   &__panel {
-    @include card-surface;
+    @include card-surface($space-5);
 
-    padding: 18px 20px 4px;
+    padding-bottom: $space-2;
   }
 
   &__subtitle {
-    margin: 0 0 16px;
+    margin: 0 0 $space-4;
+    color: var(--app-text-1);
     font-size: 15px;
     font-weight: 600;
-    color: var(--el-text-color-primary);
   }
 
   &__form {
     max-width: 620px;
-    padding-bottom: 10px;
   }
 
+  // 底部提交条：浅底卡片，避免与两条明细卡混淆
   &__bar {
-    @include card-surface;
-
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 16px;
-    padding: 14px 20px;
+    gap: $space-4;
+    padding: $space-4 $space-5;
+    background: var(--app-bg-card);
+    border-radius: var(--app-radius-card);
+    box-shadow: var(--app-shadow-card);
   }
 
   &__bar-tip {
-    color: var(--el-text-color-regular);
-    font-size: 13px;
+    color: var(--app-text-3);
+    font-size: $font-13;
 
     b {
-      color: var(--el-text-color-primary);
+      color: var(--app-text-1);
+      font-variant-numeric: tabular-nums;
     }
   }
 
   &__bar-total {
-    color: $color-price;
+    color: var(--app-color-price);
     font-size: 24px;
     font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+}
+
+@include respond-below('sm') {
+  .confirm__panel {
+    padding: $space-4;
+  }
+
+  .confirm__bar {
+    flex-wrap: wrap;
+    gap: $space-2;
+    justify-content: space-between;
   }
 }
 </style>

@@ -6,10 +6,10 @@
 -->
 <template>
   <div class="order-list">
-    <h2 class="order-list__title">我的订单</h2>
+    <PageHeader title="我的订单" description="未付款订单可取消，取消后库存与销量自动回滚" />
 
     <div class="order-list__tabs">
-      <el-radio-group v-model="query.status" @change="search">
+      <el-radio-group v-model="query.status" class="is-pill" size="small" @change="search">
         <el-radio-button value="">全部</el-radio-button>
         <el-radio-button v-for="item in statusTabs" :key="item.value" :value="item.value">
           {{ item.label }}
@@ -50,6 +50,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import OrderCard from './OrderCard.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
+import PageHeader from '@/components/common/PageHeader.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import { useTable } from '@/composables/useTable'
 import { cancelOrderApi, getMyOrdersApi, payOrderApi } from '@/api/before/order'
@@ -122,22 +123,44 @@ async function onCancel(order) {
 .order-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: $space-4;
 
-  &__title {
-    margin: 0;
-    padding-left: 10px;
-    border-left: 3px solid $color-primary;
-    font-size: 17px;
-    font-weight: 600;
-    line-height: 1.2;
-    color: var(--el-text-color-primary);
+  // 状态页签：胶囊分段，与搜索页筛选条同款语言
+  &__tabs {
+    display: flex;
+    padding: $space-3 $space-4;
+    background: var(--app-bg-card);
+    border-radius: var(--app-radius-card);
+    box-shadow: var(--app-shadow-card);
+
+    :deep(.el-radio-group) {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    :deep(.el-radio-button__inner) {
+      padding: 5px 14px;
+      background: var(--app-bg-card);
+      border: 1px solid var(--app-border);
+      border-radius: $radius-pill;
+      margin-left: 0;
+      color: var(--app-text-2);
+      font-size: $font-13;
+      box-shadow: none;
+    }
+
+    :deep(.el-radio-button__original-radio:checked + .el-radio-button__inner) {
+      background: var(--app-color-primary);
+      border-color: var(--app-color-primary);
+      color: #fff;
+    }
   }
 
   &__body {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: $space-3;
     min-height: 120px;
   }
 }

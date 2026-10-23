@@ -6,7 +6,7 @@
 <template>
   <div v-loading="loading" class="order-detail">
     <template v-if="order">
-      <h2 class="order-detail__title">订单详情</h2>
+      <PageHeader title="订单详情" :description="`订单编号 ${order.orderNo}`" />
 
       <!-- 状态区 -->
       <section class="order-detail__panel order-detail__status">
@@ -90,6 +90,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import StatusTag from '@/components/common/StatusTag.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
+import PageHeader from '@/components/common/PageHeader.vue'
 import OrderGoodsList from '@/components/before/OrderGoodsList.vue'
 import { MOBILE_QUERY, useMediaQuery } from '@/composables/useMediaQuery'
 import { cancelOrderApi, getOrderDetailApi, payOrderApi } from '@/api/before/order'
@@ -163,68 +164,67 @@ onMounted(loadDetail)
 .order-detail {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: $space-4;
   min-height: 320px;
 
-  &__title {
-    margin: 0;
-    padding-left: 10px;
-    border-left: 3px solid $color-primary;
-    font-size: 17px;
-    font-weight: 600;
-    line-height: 1.2;
-    color: var(--el-text-color-primary);
-  }
-
   &__panel {
-    @include card-surface;
-
-    padding: 18px 20px;
+    @include card-surface($space-5);
   }
 
   &__subtitle {
-    margin: 0 0 14px;
+    margin: 0 0 $space-4;
+    color: var(--app-text-1);
     font-size: 15px;
     font-weight: 600;
-    color: var(--el-text-color-primary);
   }
 
   &__status {
-    padding-top: 20px;
+    padding-top: $space-5;
   }
 
   &__status-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 20px;
+    margin-bottom: $space-5;
   }
 
   &__status-text {
-    color: $color-price;
-    font-size: 20px;
+    color: var(--app-color-price);
+    font-size: $font-20;
     font-weight: 700;
+    letter-spacing: -0.01em;
   }
 
   &__total {
     display: flex;
     align-items: baseline;
     justify-content: flex-end;
-    gap: 8px;
-    margin-top: 16px;
-    color: var(--el-text-color-secondary);
-    font-size: 13px;
+    gap: $space-2;
+    margin-top: $space-4;
+    padding-top: $space-4;
+    border-top: 1px solid var(--app-bg-subtle);
+    color: var(--app-text-3);
+    font-size: $font-13;
   }
 
   &__total-label {
-    color: var(--el-text-color-regular);
-    font-size: 14px;
+    color: var(--app-text-2);
+    font-size: $font-14;
   }
 
   &__total-value {
-    color: $color-price;
+    color: var(--app-color-price);
     font-size: 24px;
     font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+}
+
+@include respond-below('sm') {
+  .order-detail__panel {
+    padding: $space-4;
   }
 }
 </style>

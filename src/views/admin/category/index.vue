@@ -6,15 +6,23 @@
 -->
 <template>
   <div class="category">
+    <PageHeader
+      title="商品类型管理"
+      :badge="`共 ${total} 个`"
+      description="类型决定前台分类入口与筛选条件"
+    >
+      <template #actions>
+        <el-button type="primary" @click="openForm()">新增类型</el-button>
+      </template>
+    </PageHeader>
+
     <SearchForm
       :model-value="query"
       :fields="searchFields"
       :loading="loading"
       @search="search"
       @reset="reset"
-    >
-      <el-button type="primary" @click="openForm()">新增类型</el-button>
-    </SearchForm>
+    />
 
     <section class="category__panel">
       <DataTable :columns="columns" :data="list" :loading="loading" show-index>
@@ -65,6 +73,7 @@ import DataTable from '@/components/common/DataTable.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import FormDialog from '@/components/common/FormDialog.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
+import PageHeader from '@/components/common/PageHeader.vue'
 import { useTable } from '@/composables/useTable'
 import { useDialog } from '@/composables/useDialog'
 import { useCategoryStore } from '@/store/modules/category'
@@ -94,11 +103,11 @@ const rules = {
 const searchFields = [{ prop: 'name', label: '类型名称' }]
 
 const columns = [
-  { prop: 'id', label: 'ID', width: 90 },
+  { prop: 'id', label: 'ID', width: 80 },
   { prop: 'name', label: '类型名称', minWidth: 160 },
-  { prop: 'sort', label: '排序', width: 90, align: 'center' },
-  { prop: 'createTime', label: '创建时间', type: 'date', width: 180 },
-  { label: '操作', type: 'action', width: 140, align: 'center', fixed: 'right' }
+  { prop: 'sort', label: '排序', width: 80, align: 'center' },
+  { prop: 'createTime', label: '创建时间', type: 'date', width: 150 },
+  { label: '操作', type: 'action', width: 120, align: 'center', fixed: 'right' }
 ]
 
 /**
@@ -164,13 +173,19 @@ async function onDelete(target) {
   &__panel {
     @include card-surface;
 
-    padding: 16px 16px 8px;
+    padding: $space-2 $space-5 $space-4;
   }
 
   &__field-tip {
-    margin-left: 10px;
-    color: var(--el-text-color-secondary);
-    font-size: 12px;
+    margin-left: $space-3;
+    color: var(--app-text-3);
+    font-size: $font-12;
+  }
+}
+
+@include respond-below('sm') {
+  .category__panel {
+    padding: $space-2 $space-3 $space-3;
   }
 }
 </style>

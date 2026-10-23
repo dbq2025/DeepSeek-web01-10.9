@@ -6,31 +6,33 @@
 -->
 <template>
   <div class="cart">
-    <h2 class="cart__title">我的购物车</h2>
+    <PageHeader title="我的购物车" description="商品价格与库存以详情页为准，结算前可随时修改数量" />
 
     <EmptyState v-if="!cartStore.items.length" description="购物车还是空的，去挑几件商品吧">
       <el-button type="primary" @click="router.push('/home')">去逛逛</el-button>
     </EmptyState>
 
-    <template v-else>
-      <CartTable
-        v-if="!isMobile"
-        :items="cartStore.items"
-        :all-checked="cartStore.allChecked"
-        @toggle-all="cartStore.toggleAll"
-        @toggle-checked="cartStore.toggleChecked"
-        @update-count="cartStore.updateCount"
-        @remove="onRemove"
-        @open-goods="openGoods"
-      />
-      <CartCards
-        v-else
-        :items="cartStore.items"
-        @toggle-checked="cartStore.toggleChecked"
-        @update-count="cartStore.updateCount"
-        @remove="onRemove"
-        @open-goods="openGoods"
-      />
+    <div v-else class="cart__layout">
+      <section class="cart__panel">
+        <CartTable
+          v-if="!isMobile"
+          :items="cartStore.items"
+          :all-checked="cartStore.allChecked"
+          @toggle-all="cartStore.toggleAll"
+          @toggle-checked="cartStore.toggleChecked"
+          @update-count="cartStore.updateCount"
+          @remove="onRemove"
+          @open-goods="openGoods"
+        />
+        <CartCards
+          v-else
+          :items="cartStore.items"
+          @toggle-checked="cartStore.toggleChecked"
+          @update-count="cartStore.updateCount"
+          @remove="onRemove"
+          @open-goods="openGoods"
+        />
+      </section>
 
       <CartSummary
         :all-checked="cartStore.allChecked"
@@ -40,7 +42,7 @@
         @remove-checked="onRemoveChecked"
         @checkout="onCheckout"
       />
-    </template>
+    </div>
   </div>
 </template>
 
@@ -48,6 +50,7 @@
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import EmptyState from '@/components/common/EmptyState.vue'
+import PageHeader from '@/components/common/PageHeader.vue'
 import CartTable from './CartTable.vue'
 import CartCards from './CartCards.vue'
 import CartSummary from './CartSummary.vue'
@@ -120,16 +123,34 @@ function onCheckout() {
 .cart {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: $space-4;
 
-  &__title {
-    margin: 0;
-    padding-left: 10px;
-    border-left: 3px solid $color-primary;
-    font-size: 17px;
-    font-weight: 600;
-    line-height: 1.2;
-    color: var(--el-text-color-primary);
+  // 桌面：左表格 + 右结算侧栏（320px），侧栏 sticky 跟随
+  &__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: $space-4;
+    align-items: start;
+  }
+
+  &__panel {
+    @include card-surface;
+
+    padding: $space-2 $space-5 $space-2;
+    overflow: hidden;
+  }
+}
+
+// 平板及以下：结算卡落回表格下方，单列排布
+@include respond-below('lg') {
+  .cart__layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@include respond-below('sm') {
+  .cart__panel {
+    padding: $space-2 $space-3;
   }
 }
 </style>

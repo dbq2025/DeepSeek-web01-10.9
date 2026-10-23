@@ -4,7 +4,7 @@
   说明：1) 封面改 4:3（原 1:1 过高，导致网格节奏松散、价格被挤出可视区）；
        2) 描述行删除（与名称冗余），改展示「已售」；
        3) 加购按钮为右下角圆形按钮，触屏设备常显（不依赖 hover 才能加购）；
-       4) 父级若需自定义操作，传 :show-actions="false" 并用 #actions 插槽自行渲染
+       4) 父级若需自定义操作，传 :show-actions="false" 并用 #actions 插槽自行渲染（插槽独占一行）
 -->
 <template>
   <article class="goods-card" :class="{ 'is-off': !onSale }" @click="goDetail">
@@ -25,9 +25,8 @@
 
         <span class="goods-card__sales">已售 {{ goods.sales }}</span>
 
-        <div v-if="showActions || $slots.actions" class="goods-card__actions">
+        <div v-if="showActions" class="goods-card__actions">
           <el-button
-            v-if="showActions"
             class="goods-card__cart"
             type="primary"
             circle
@@ -36,8 +35,12 @@
             aria-label="加入购物车"
             @click.stop="onAddCart"
           />
-          <slot name="actions" />
         </div>
+      </div>
+
+      <!-- 自定义操作：独占一行，避免与价格挤在同一行 -->
+      <div v-if="$slots.actions" class="goods-card__extra">
+        <slot name="actions" />
       </div>
     </div>
   </article>
@@ -225,6 +228,17 @@ function onAddCart() {
     flex: none;
     align-items: center;
     gap: $space-2;
+    margin-left: $space-1;
+  }
+
+  // 自定义操作行（收藏页用）
+  &__extra {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-2;
+    margin-top: $space-1;
+    padding-top: $space-3;
+    border-top: 1px solid var(--app-bg-subtle);
   }
 
   // 圆形加购按钮：hover 设备上只在卡片 hover 时淡入，触屏设备常显

@@ -13,7 +13,7 @@
     </router-link>
 
     <el-menu
-      class="sidebar__menu"
+      class="sidebar__menu el-menu--nav"
       :default-active="activeMenu"
       :collapse="collapsed"
       :collapse-transition="false"

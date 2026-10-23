@@ -191,7 +191,7 @@ onMounted(() => {
 
   &__heading {
     margin: 0 0 12px;
-    color: var(--el-text-color-primary);
+    color: var(--app-text-1);
     font-size: 20px;
   }
 
@@ -207,13 +207,13 @@ onMounted(() => {
 
   &__subheading {
     margin: 0 0 6px;
-    color: var(--el-text-color-primary);
+    color: var(--app-text-1);
     font-size: 16px;
   }
 
   &__hint {
     margin: 0 0 12px;
-    color: var(--el-text-color-secondary);
+    color: var(--app-text-3);
     font-size: 13px;
     line-height: 1.6;
   }
@@ -228,12 +228,12 @@ onMounted(() => {
 
   &__row-label {
     width: 80px;
-    color: var(--el-text-color-regular);
+    color: var(--app-text-2);
     font-size: 13px;
   }
 
   &__empty-box {
-    background: var(--el-fill-color-lighter);
+    background: var(--app-bg-subtle);
     border-radius: 6px;
   }
 

@@ -160,8 +160,9 @@
   }
 }
 
-// ---------- 深色导航：全量覆盖 --el-menu-* 变量，不写 :deep 硬改
-.el-menu {
+// ---------- 深色导航：只在带 .el-menu--nav 修饰类的菜单上生效（后台侧栏），
+// 避免把个人中心等浅色侧栏菜单也染黑；全量覆盖 --el-menu-* 变量，不写 :deep 硬改
+.el-menu--nav {
   --el-menu-bg-color: #{$nav-bg};
   --el-menu-text-color: #{$nav-text};
   --el-menu-active-color: #{$nav-text-active};

@@ -89,14 +89,14 @@ const emit = defineEmits(['toggle-checked', 'update-count', 'remove', 'open-good
     @include ellipsis-multi(2);
 
     margin: 0 0 6px;
-    color: var(--el-text-color-primary);
+    color: var(--app-text-1);
     font-size: 14px;
     line-height: 1.4;
   }
 
   &__price {
     margin: 0 0 8px;
-    color: $color-price;
+    color: var(--app-color-price);
     font-size: 15px;
     font-weight: 600;
   }
@@ -110,7 +110,7 @@ const emit = defineEmits(['toggle-checked', 'update-count', 'remove', 'open-good
 
   &__subtotal {
     flex: none;
-    color: $color-price;
+    color: var(--app-color-price);
     font-size: 14px;
     font-weight: 600;
   }
