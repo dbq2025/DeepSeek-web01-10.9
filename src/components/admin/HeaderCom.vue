@@ -29,7 +29,7 @@
           <el-icon><UserFilled /></el-icon>
         </el-avatar>
         <span class="header__nickname">{{ nickname }}</span>
-        <el-icon><ArrowDown /></el-icon>
+        <el-icon class="header__caret"><ArrowDown /></el-icon>
       </span>
       <template #dropdown>
         <el-dropdown-menu>
@@ -96,40 +96,84 @@ onMounted(async () => {
 <style scoped lang="scss">
 .header {
   display: flex;
+  flex: none;
   align-items: center;
   justify-content: space-between;
-  height: 56px;
-  padding: 0 16px;
-  background: var(--el-bg-color);
-  border-bottom: 1px solid var(--el-border-color-lighter);
+  height: $admin-header-h;
+  padding: 0 $space-6;
+  // 半透明白 + 模糊：内容滚动时不至于「糊成一条灰带」
+  background: rgb(255 255 255 / 82%);
+  border-bottom: 1px solid var(--app-border);
+  backdrop-filter: blur(12px);
 
   &__left {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: $space-4;
   }
 
   &__toggle {
-    color: var(--el-text-color-regular);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--app-radius-control);
+    color: var(--app-text-2);
     font-size: 18px;
     cursor: pointer;
+    transition:
+      background var(--app-dur) var(--app-ease),
+      color var(--app-dur) var(--app-ease);
+    @include focus-ring;
 
     &:hover {
-      color: var(--el-color-primary);
+      background: var(--app-bg-subtle);
+      color: var(--app-color-primary);
     }
   }
 
   &__user {
     display: flex;
     align-items: center;
-    gap: 8px;
-    color: var(--el-text-color-regular);
+    gap: $space-2;
+    height: 40px;
+    padding: 0 10px 0 6px;
+    border: 1px solid transparent;
+    border-radius: var(--app-radius-pill);
+    color: var(--app-text-2);
     cursor: pointer;
     outline: none;
+    transition:
+      background var(--app-dur) var(--app-ease),
+      border-color var(--app-dur) var(--app-ease);
+
+    &:hover {
+      background: var(--app-bg-subtle);
+      border-color: var(--app-border);
+    }
   }
 
   &__nickname {
-    font-size: 14px;
+    max-width: 120px;
+    font-size: $font-14;
+    font-weight: 500;
+    @include ellipsis;
+  }
+
+  &__caret {
+    color: var(--app-text-3);
+    font-size: 12px;
+  }
+}
+
+@include respond-below('sm') {
+  .header {
+    padding: 0 $space-4;
+  }
+
+  .header__nickname {
+    display: none;
   }
 }
 </style>

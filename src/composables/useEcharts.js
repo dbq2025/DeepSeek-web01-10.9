@@ -33,6 +33,8 @@ echarts.use([
 export function useEcharts(elRef) {
   /** @type {object|null} */
   let chart = null
+  /** @type {ResizeObserver|null} 监听容器尺寸变化（侧栏折叠不触发 window.resize） */
+  let observer = null
 
   /** 初始化实例（重复调用会复用已有实例） */
   function init() {
@@ -72,12 +74,32 @@ export function useEcharts(elRef) {
     return chart
   }
 
+  /**
+   * 建立容器尺寸监听
+   * 说明：侧边栏折叠只改变 flex 宽度、不触发 window.resize，
+   *      改造前图表因此不会自适应（既有缺陷，此处顺手修复）
+   */
+  function observeContainer() {
+    if (observer || !elRef.value || typeof ResizeObserver === 'undefined') return
+    observer = new ResizeObserver(() => {
+      // 容器不可见（display:none / 宽高为 0）时 resize 会报错，跳过
+      if (!elRef.value || !elRef.value.clientWidth) return
+      if (chart) chart.resize()
+    })
+    observer.observe(elRef.value)
+  }
+
   onMounted(() => {
     window.addEventListener('resize', resize)
+    observeContainer()
   })
 
   onBeforeUnmount(() => {
     window.removeEventListener('resize', resize)
+    if (observer) {
+      observer.disconnect()
+      observer = null
+    }
     dispose()
   })
 
